@@ -25,7 +25,6 @@
         'project',
         'stock',
         'infinys_purchase_order_approval',
-        'infinys_margin_validation',
     ],
     'data': [
         'security/boq_groups.xml',
