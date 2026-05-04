@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <!-- Root app menu -->
+    <menuitem id="menu_boq_root"
+              name="BOQ"
+              sequence="85"
+              web_icon="boq_management_v19,static/src/img/boq_icon.png"
+              groups="boq_management_v19.group_boq_user"/>
+
+
+
+    <menuitem
+        id="menu_vendor_dashboard_app"
+        name="Vendor Dashboard"
+        sequence="86"
+        web_icon="boq_management_v19,static/src/img/vendor.png"
+        groups="boq_management_v19.group_vendor_manager_dashboard"/>
+
+    <menuitem
+        id="menu_vendor_dashboard_app_home"
+        name="Dashboard"
+        parent="menu_vendor_dashboard_app"
+        action="action_vendor_manager_dashboard"
+        sequence="1"
+        groups="boq_management_v19.group_vendor_manager_dashboard"/>
+
+    <menuitem
+        id="menu_procurement_dashboard_app"
+        name="Procurement Dashboard"
+        sequence="87"
+        web_icon="boq_management_v19,static/src/img/supplier.png"
+        groups="boq_management_v19.group_procurement_manager_dashboard"/>
+
+    <menuitem
+        id="menu_procurement_dashboard_app_home"
+        name="Dashboard"
+        parent="menu_procurement_dashboard_app"
+        action="action_procurement_manager_dashboard"
+        sequence="1"
+        groups="boq_management_v19.group_procurement_manager_dashboard"/>
+
+    <menuitem
+        id="menu_head_dashboard_app"
+        name="Head of Supplier"
+        sequence="88"
+        web_icon="boq_management_v19,static/src/img/head_supplier_icon.svg"
+        groups="boq_management_v19.group_head_supplier_dashboard"/>
+
+    <menuitem
+        id="menu_head_dashboard_app_home"
+        name="Dashboard"
+        parent="menu_head_dashboard_app"
+        action="action_head_supplier_dashboard"
+        sequence="1"
+        groups="boq_management_v19.group_head_supplier_dashboard"/>
+
+    <menuitem id="menu_boq_main"
+              name="BOQ"
+              parent="menu_boq_root"
+              sequence="10"/>
+
+    <menuitem id="menu_boq_all"
+              name="All BOQs"
+              parent="menu_boq_main"
+              action="action_boq_boq"
+              sequence="10"/>
+
+    <menuitem id="menu_boq_my"
+              name="My BOQs"
+              parent="menu_boq_main"
+              action="action_boq_boq"
+              sequence="20"/>
+
+    <menuitem id="menu_boq_rfq"
+              name="RFQ"
+              parent="menu_boq_root"
+              sequence="30"/>
+
+    <menuitem id="menu_boq_vendor_rfq"
+              name="Vendor RFQ"
+              parent="menu_boq_rfq"
+              action="action_boq_rfq_list"
+              sequence="10"
+              groups="boq_management_v19.group_boq_user"/>
+
+    <menuitem id="menu_boq_supplier_rfq"
+              name="Supplier RFQ"
+              parent="menu_boq_rfq"
+              action="action_boq_supplier_rfq_list"
+              sequence="20"
+              groups="boq_management_v19.group_boq_user"/>
+
+    <menuitem id="menu_boq_report"
+              name="Reporting"
+              parent="menu_boq_root"
+              sequence="50"
+              groups="boq_management_v19.group_boq_manager"/>
+
+    <menuitem id="menu_boq_vendor_list"
+              name="Vendors"
+              parent="menu_boq_report"
+              action="action_boq_vendor_list"
+              sequence="20"
+              groups="boq_management_v19.group_boq_manager"/>
+
+    <menuitem id="menu_boq_vendor_ratings"
+              name="Vendor Ratings"
+              parent="menu_boq_report"
+              action="action_boq_vendor_rating"
+              sequence="30"
+              groups="boq_management_v19.group_boq_manager"/>
+
+    <menuitem id="menu_purchase_boq_vendor_rfq"
+              name="Vendor RFQ"
+              parent="purchase.menu_purchase_rfq"
+              action="boq_management_v19.action_boq_rfq_list"
+              sequence="25"
+              groups="purchase.group_purchase_user"/>
+
+    <menuitem id="menu_purchase_boq_supplier_rfq"
+              name="Supplier RFQ"
+              parent="purchase.menu_purchase_rfq"
+              action="boq_management_v19.action_boq_supplier_rfq_list"
+              sequence="26"
+              groups="purchase.group_purchase_user"/>
+
+    <menuitem id="menu_boq_config"
+              name="Configuration"
+              parent="menu_boq_root"
+              sequence="90"
+              groups="boq_management_v19.group_boq_manager"/>
+
+    <menuitem id="menu_boq_categories"
+              name="Work Categories"
+              parent="menu_boq_config"
+              action="action_boq_category"
+              sequence="10"/>
+
+    <menuitem
+            id="menu_vendor_purchase_root"
+            name="Vendor"
+            sequence="90"
+            web_icon="boq_management_v19,static/src/img/vendor.png"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_vendor_orders"
+            name="Orders"
+            parent="menu_vendor_purchase_root"
+            sequence="5"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_vendor_rfq_orders"
+            name="Requests for Quotation"
+            parent="menu_vendor_orders"
+            action="action_boq_rfq_list"
+            sequence="1"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_vendor_po"
+            name="Purchase Orders"
+            parent="menu_vendor_orders"
+            action="purchase.purchase_form_action"
+            sequence="2"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_vendor_products"
+            name="Products"
+            parent="menu_vendor_purchase_root"
+            sequence="8"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_vendor_product_list"
+            name="Products"
+            parent="menu_vendor_products"
+            action="product.product_normal_action"
+            sequence="1"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_vendor_reporting"
+            name="Reporting"
+            parent="menu_vendor_purchase_root"
+            sequence="10"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_vendor_reporting_purchase"
+            name="Purchase"
+            parent="menu_vendor_reporting"
+            action="action_vendor_purchase_report"
+            sequence="1"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_vendor_my_approvals"
+            name="My Approvals"
+            parent="menu_vendor_reporting"
+            action="action_vendor_my_approvals"
+            sequence="2"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_vendor_configuration"
+            name="Configuration"
+            parent="menu_vendor_purchase_root"
+            sequence="50"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_vendor_settings"
+            name="Settings"
+            parent="menu_vendor_configuration"
+            action="purchase.action_purchase_configuration"
+            sequence="1"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_vendor_pricelist"
+            name="Vendor Pricelists"
+            parent="menu_vendor_configuration"
+            action="product.product_supplierinfo_type_action"
+            sequence="2"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_vendor_approval_levels"
+            name="Approval Levels"
+            parent="menu_vendor_configuration"
+            action="infinys_purchase_order_approval.action_purchase_approval_level"
+            sequence="3"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_vendor_categories"
+            name="Categories"
+            parent="menu_vendor_configuration"
+            action="product.product_category_action_form"
+            sequence="4"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_supplier_purchase_root"
+            name="Procurement"
+            sequence="100"
+            web_icon="boq_management_v19,static/src/img/supplier.png"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <menuitem
+            id="menu_supplier_orders"
+            name="Orders"
+            parent="menu_supplier_purchase_root"
+            sequence="5"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <menuitem
+            id="menu_supplier_rfq_orders"
+            name="Requests for Quotation"
+            parent="menu_supplier_orders"
+            action="action_boq_supplier_rfq_list"
+            sequence="1"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <menuitem
+            id="menu_supplier_po"
+            name="Purchase Orders"
+            parent="menu_supplier_orders"
+            action="purchase.purchase_form_action"
+            sequence="2"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <menuitem
+            id="menu_supplier_products"
+            name="Products"
+            parent="menu_supplier_purchase_root"
+            sequence="8"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <menuitem
+            id="menu_supplier_product_list"
+            name="Products"
+            parent="menu_supplier_products"
+            action="product.product_normal_action"
+            sequence="1"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <menuitem
+            id="menu_supplier_reporting"
+            name="Reporting"
+            parent="menu_supplier_purchase_root"
+            sequence="10"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <menuitem
+            id="menu_supplier_reporting_purchase"
+            name="Purchase"
+            parent="menu_supplier_reporting"
+            action="action_supplier_purchase_report"
+            sequence="1"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <menuitem
+            id="menu_supplier_my_approvals"
+            name="My Approvals"
+            parent="menu_supplier_reporting"
+            action="action_supplier_my_approvals"
+            sequence="2"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <menuitem
+            id="menu_supplier_configuration"
+            name="Configuration"
+            parent="menu_supplier_purchase_root"
+            sequence="50"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <menuitem
+            id="menu_supplier_settings"
+            name="Settings"
+            parent="menu_supplier_configuration"
+            action="purchase.action_purchase_configuration"
+            sequence="1"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <menuitem
+            id="menu_supplier_approval_levels"
+            name="Approval Levels"
+            parent="menu_supplier_configuration"
+            action="infinys_purchase_order_approval.action_purchase_approval_level"
+            sequence="3"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <menuitem
+            id="menu_supplier_categories"
+            name="Categories"
+            parent="menu_supplier_configuration"
+            action="product.product_category_action_form"
+            sequence="4"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <record id="purchase.menu_purchase_root" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+
+
+    <record id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+
+</odoo>

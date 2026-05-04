@@ -1,0 +1,59 @@
+# -*- coding: utf-8 -*-
+{
+    'name': 'BOQ Management — Bill of Quantities (Odoo 19)',
+    'version': '19.0.3.1.0',
+    
+    
+    
+    'summary': 'BOQ with trade-type RFQ creation, vendor+supplier ratings, dual manager dashboards',
+    'description': """
+        BOQ Management
+    """,
+    'author': '',
+    'category': 'Industries/Construction',
+    'license': 'OPL-1',
+    'depends': [
+        'base',
+        'mail',
+        'product',
+        'contacts',
+        'web',
+        'uom',
+        'purchase',
+        'purchase_stock',
+        'account',
+        'project',
+        'stock',
+        'infinys_purchase_order_approval',
+        'infinys_margin_validation',
+    ],
+    'data': [
+        'security/boq_groups.xml',
+        'security/ir.model.access.csv',
+        'data/boq_sequence_data.xml',
+        'data/boq_category_data.xml',
+        'data/mail_template_data.xml',
+        'views/boq_dashboard_views.xml',
+        'views/boq_boq_views.xml',
+        'views/boq_category_views.xml',
+        'views/boq_order_line_views.xml',
+        'views/boq_vendor_rating_views.xml',
+        'views/res_partner_views.xml',
+        'views/purchase_order_views.xml',
+        'views/portal_purchase_hide_button.xml',
+        'views/menu_views.xml',
+    ],
+    'assets': {
+        'web.assets_backend': [
+            'boq_management_v19/static/src/css/boq_enterprise.css',
+            'boq_management_v19/static/src/css/boq_dashboard.css',
+            'boq_management_v19/static/src/js/boq_dashboard.js',
+            'boq_management_v19/static/src/js/boq_form.js',
+            'boq_management_v19/static/src/xml/boq_dashboard.xml',
+        ],
+    },
+    'images': ['static/src/img/boq_icon.png'],
+    'installable': True,
+    'application': True,
+    'auto_install': False,
+}

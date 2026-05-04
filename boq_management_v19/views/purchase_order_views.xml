@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_mail_compose_message_inherit_cc" model="ir.ui.view">
+        <field name="name">mail.compose.message.form.inherit.cc</field>
+        <field name="model">mail.compose.message</field>
+        <field name="inherit_id" ref="mail.email_compose_message_wizard_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='subject']" position="after">
+                <field name="email_cc" string="Cc" placeholder="Add CC emails..."/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_purchase_order_form_boq_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.form.boq.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+
+                <button name="action_open_boq" type="object"
+                        class="oe_stat_button" icon="fa-calculator"
+                        invisible="not boq_id" string="View BOQ">
+                    <field name="boq_id" widget="statinfo" string="BOQ"/>
+                </button>
+
+                <button name="action_rate_vendor" type="object"
+                        class="oe_stat_button" icon="fa-star"
+                        invisible="not show_rate_vendor"
+                        string="Rate Vendor"/>
+
+                <field name="show_rate_vendor" invisible="1"/>
+
+            </xpath>
+
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="boq_id" string="BOQ Reference"
+                       options="{'no_create': True}" invisible="not boq_id"/>
+            </xpath>
+
+            <xpath expr="//field[@name='partner_ref']" position="after">
+                <field name="partner_type" invisible="1"/>
+                <field name="margin_percent" string="Margin %"
+                       widget="percentage" readonly="1"
+                       invisible="partner_type == 'supplier'"/>
+                <field name="payment_status_display" string="Payment Status" readonly="1"
+                       invisible="state not in ('purchase','done')"/>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']//field[@name='name']"
+                   position="attributes">
+                <attribute name="optional">show</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']//field[@name='price_subtotal']"
+                   position="after">
+                <field name="customer_price" readonly="1"
+                       column_invisible="parent.partner_type == 'supplier'"/>
+                <field name="margin_percent" string="Savings %"
+                       widget="percentage"
+                       optional="show"
+                       readonly="1"
+                       column_invisible="parent.partner_type == 'supplier'"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_purchase_order_boq_margin_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.form.boq.margin.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="infinys_margin_validation.purchase_order_form_inherit_margin"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='margin_percentage']" position="attributes">
+                <attribute name="column_invisible">parent.partner_type == 'supplier'</attribute>
+            </xpath>
+        </field>
+    </record>
+    <record id="action_boq_rfq_list" model="ir.actions.act_window">
+        <field name="name">Vendor RFQ</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('partner_id.partner_type', 'in', ['vendor', False])]</field>
+        <field name="context">{'search_default_draft': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No Vendor RFQs yet!</p>
+            <p>Open a BOQ, assign vendors to lines, then click <b>Create RFQ</b>.</p>
+        </field>
+    </record>
+
+    <record id="action_boq_supplier_rfq_list" model="ir.actions.act_window">
+        <field name="name">Supplier RFQ</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('partner_id.partner_type', '=', 'supplier')]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No Supplier RFQs yet!</p>
+            <p>Assign partner_type = "Supplier" to a vendor, then create RFQs for them.</p>
+        </field>
+    </record>
+
+    <record id="action_vendor_purchase_report" model="ir.actions.act_window">
+        <field name="name">Purchase</field>
+        <field name="res_model">purchase.report</field>
+        <field name="view_mode">graph,pivot</field>
+        <field name="domain">[('partner_id.partner_type', '=', 'vendor')]</field>
+    </record>
+
+    <record id="action_supplier_purchase_report" model="ir.actions.act_window">
+        <field name="name">Purchase</field>
+        <field name="res_model">purchase.report</field>
+        <field name="view_mode">graph,pivot</field>
+        <field name="domain">[('partner_id.partner_type', '=', 'supplier')]</field>
+    </record>
+
+    <record id="action_vendor_my_approvals" model="ir.actions.act_window">
+        <field name="name">My Approvals</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[
+            '|',
+            '&amp;',
+            ('state', '=', 'to approve'),
+            ('current_approver_ids', 'in', [uid]),
+            '|',
+            ('approval_line_ids.approved_by_user_id', '=', uid),
+            ('approval_line_ids.rejected_by_user_id', '=', uid)
+            ]
+        </field>
+        <field name="context">{'create': False, 'search_default_my_pending_approvals': 1}</field>
+    </record>
+
+    <record id="action_supplier_my_approvals" model="ir.actions.act_window">
+        <field name="name">My Approvals</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[
+            '|',
+            '&amp;',
+            ('state', '=', 'to approve'),
+            ('current_approver_ids', 'in', [uid]),
+            '|',
+            ('approval_line_ids.approved_by_user_id', '=', uid),
+            ('approval_line_ids.rejected_by_user_id', '=', uid)
+            ]
+        </field>
+        <field name="context">{'create': False, 'search_default_my_pending_approvals': 1}</field>
+    </record>
+
+    <record id="action_boq_vendor_list" model="ir.actions.act_window">
+        <field name="name">Vendors</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('supplier_rank', '&gt;', 0)]</field>
+        <field name="context">{'search_default_supplier_rank': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No vendors found.</p>
+            <p>Vendors are suppliers assigned on BOQ lines when creating RFQs.</p>
+        </field>
+    </record>
+
+    <record id="action_vendor_contacts" model="ir.actions.act_window">
+        <field name="name">Vendor Contacts</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form,kanban</field>
+        <field name="domain">[('partner_type', '=', 'vendor')]</field>
+    </record>
+
+    <record id="action_supplier_contacts" model="ir.actions.act_window">
+        <field name="name">Supplier Contacts</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form,kanban</field>
+        <field name="domain">[('partner_type', '=', 'supplier')]</field>
+    </record>
+
+    <menuitem
+            id="menu_vendor_contacts_app"
+            name="Vendor Contacts"
+            sequence="20"
+            web_icon="boq_management_v19,static/src/img/vendor_contact.png"
+            groups="boq_management_v19.group_vendor"
+    />
+
+    <menuitem
+            id="menu_supplier_contacts_app"
+            name="Supplier Contacts"
+            sequence="30"
+            web_icon="boq_management_v19,static/src/img/supplier_contact.png"
+            groups="boq_management_v19.group_supplier"
+    />
+
+    <menuitem
+            id="menu_vendor_contacts_root"
+            name="Contacts"
+            parent="menu_vendor_contacts_app"
+            action="action_vendor_contacts"
+            sequence="1"
+    />
+
+    <menuitem
+            id="menu_supplier_contacts_root"
+            name="Contacts"
+            parent="menu_supplier_contacts_app"
+            action="action_supplier_contacts"
+            sequence="1"
+    />
+
+</odoo>

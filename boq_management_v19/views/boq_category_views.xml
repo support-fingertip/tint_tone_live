@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<record id="view_boq_category_list" model="ir.ui.view">
+        <field name="name">boq.category.list</field>
+        <field name="model">boq.category</field>
+        <field name="arch" type="xml">
+            <list string="Work Categories" editable="top">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="icon" optional="show"/>
+                <field name="boq_count" string="BOQs"/>
+                <field name="line_count" string="Lines"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+<record id="view_boq_category_form" model="ir.ui.view">
+        <field name="name">boq.category.form</field>
+        <field name="model">boq.category</field>
+        <field name="arch" type="xml">
+            <form string="Work Category" class="boq_category_form">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(boq_management_v19.action_boq_boq)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-calculator">
+                            <field name="boq_count" widget="statinfo" string="BOQs"/>
+                        </button>
+                        <button name="%(boq_management_v19.action_boq_boq)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-list">
+                            <field name="line_count" widget="statinfo" string="Lines"/>
+                        </button>
+                    </div>
+                    <div class="boq_cat_form_header">
+                        <div class="boq_cat_icon_wrap">
+                            <i class="fa fa-3x" t-att-class="icon"/>
+                        </div>
+                        <div class="oe_title">
+                            <label for="name"/>
+                            <h1><field name="name" placeholder="e.g. Electrical Works"/></h1>
+                        </div>
+                    </div>
+                    <group>
+                        <group string="Identification">
+                            <field name="code" placeholder="e.g. electrical"/>
+                            <field name="sequence"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group string="Visual">
+                            <field name="color" widget="color_picker"/>
+                            <field name="icon" placeholder="fa-bolt"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description" name="desc_tab">
+                            <field name="description"
+                                   placeholder="Describe the scope of this work category…"/>
+                        </page>
+
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+<record id="view_boq_category_kanban" model="ir.ui.view">
+        <field name="name">boq.category.kanban</field>
+        <field name="model">boq.category</field>
+        <field name="arch" type="xml">
+            <kanban class="boq_cat_kanban">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="icon"/>
+                <field name="color"/>
+                <field name="boq_count"/>
+                <field name="line_count"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="boq_cat_kanban_card">
+                            <div t-attf-class="boq_cat_icon_circle boq_color_#{record.color.raw_value}">
+                                <i t-attf-class="fa #{record.icon.value} fa-lg"/>
+                            </div>
+                            <div class="boq_cat_info">
+                                <strong class="boq_cat_name">
+                                    <field name="name"/>
+                                </strong>
+                                <span class="boq_cat_code text-muted small">
+                                    <field name="code"/>
+                                </span>
+                            </div>
+                            <div class="boq_cat_stats">
+                                <span class="badge rounded-pill bg-primary">
+                                    <field name="boq_count"/> BOQs
+                                </span>
+                                <span class="badge rounded-pill bg-secondary ms-1">
+                                    <field name="line_count"/> lines
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+<record id="action_boq_category" model="ir.actions.act_window">
+        <field name="name">Work Categories</field>
+        <field name="res_model">boq.category</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No work categories yet!
+            </p>
+            <p>
+                Create categories like <b>Electrical</b>, <b>Civil</b>,
+                <b>Lighting</b>, <b>Plumbing</b> to enable dynamic tabs
+                on your BOQ forms.
+            </p>
+        </field>
+    </record>
+
+</odoo>
