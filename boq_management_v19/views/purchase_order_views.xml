@@ -178,6 +178,7 @@
         <field name="domain">['|', ('partner_type', '=', 'supplier'), ('partner_type', '=', False)]</field>
     </record>
 
+
     <menuitem
             id="menu_vendor_contacts_app"
             name="Vendor Contacts"
