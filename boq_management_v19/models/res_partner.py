@@ -65,24 +65,37 @@ class ResPartner(models.Model):
     avg_rating = fields.Float(
         string='Average Rating',
         compute='_compute_avg_rating',
-        store=False,
+        store=True,
         digits=(2, 1),
         help='Average of all vendor ratings (1–5 scale).',
     )
     rating_count = fields.Integer(
         string='Rating Count',
         compute='_compute_avg_rating',
-        store=False,
+        store=True,
     )
 
     @api.depends('rating_ids', 'rating_ids.rating_int')
     def _compute_avg_rating(self):
+        real_ids = [p.id for p in self if isinstance(p.id, int)]
+        data = {}
+        if real_ids:
+            self.env.cr.execute("""
+                SELECT partner_id,
+                       AVG(rating_int::numeric),
+                       COUNT(*)
+                  FROM boq_vendor_rating
+                 WHERE partner_id IN %s
+                   AND rating_int > 0
+                 GROUP BY partner_id
+            """, (tuple(real_ids),))
+            data = {row[0]: (float(row[1]), int(row[2]))
+                    for row in self.env.cr.fetchall()}
         for partner in self:
-            ratings = partner.rating_ids.mapped('rating_int')
-            valid = [r for r in ratings if r > 0]
-            if valid:
-                partner.avg_rating = sum(valid) / len(valid)
-                partner.rating_count = len(valid)
+            row = data.get(partner.id)
+            if row:
+                partner.avg_rating = row[0]
+                partner.rating_count = row[1]
             else:
                 partner.avg_rating = 0.0
                 partner.rating_count = 0
@@ -101,6 +114,18 @@ class ResPartner(models.Model):
                 'default_partner_id': self.id,
                 'show_rating_tab': True,
             },
+        }
+
+    def action_reload_ratings(self):
+        """Reload the vendor master form fresh so the rating_ids list reflects
+        any ratings added from POs since the page was last loaded."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'res.partner',
+            'res_id': self.id,
+            'view_mode': 'form',
+            'target': 'current',
         }
 
     def action_view_ratings(self):

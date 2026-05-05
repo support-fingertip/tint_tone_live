@@ -145,8 +145,20 @@ class BoqVendorRating(models.Model):
         return res
 
     def action_save_and_close(self):
-        """Save and close the dialog; returning act_window_close causes the
-        parent form to reload, which refreshes avg_rating / rating_count."""
+        """Save the rating and close.
+
+        From the vendor master (show_rating_tab in context): navigate to the
+        partner form so the rating list and stats reload fresh from DB.
+        From a PO dialog: just close — user stays on the PO.
+        """
+        if self.env.context.get('show_rating_tab') and self.partner_id:
+            return {
+                'type': 'ir.actions.act_window',
+                'res_model': 'res.partner',
+                'res_id': self.partner_id.id,
+                'view_mode': 'form',
+                'target': 'current',
+            }
         return {'type': 'ir.actions.act_window_close'}
 
     @api.model_create_multi
