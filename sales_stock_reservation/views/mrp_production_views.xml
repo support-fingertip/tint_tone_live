@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_production_form_inherit_reservation" model="ir.ui.view">
+        <field name="name">mrp.production.form.inherit.sales.stock.reservation</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+
+            <!-- Manual button to inject reserved components -->
+            <xpath expr="//header" position="inside">
+                <field name="has_pending_reservations" invisible="1"/>
+                <button name="action_inject_reserved_components"
+                        string="Apply Sale Reservations"
+                        type="object"
+                        class="btn-primary"
+                        invisible="not has_pending_reservations
+                                   or state in ('done','cancel')"/>
+            </xpath>
+
+            <!-- Smart button: count of auto-generated POs -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_auto_purchase_orders"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-shopping-cart">
+                    <field name="auto_purchase_order_count"
+                           widget="statinfo"
+                           string="Auto POs"/>
+                </button>
+            </xpath>
+
+            <!-- Tab showing the reservations consumed by this MO -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Sale Reservations"
+                      name="sale_reservations"
+                      invisible="not sale_reserved_ids">
+                    <field name="sale_reserved_ids" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="sale_order_id"/>
+                            <field name="sale_order_line_id"/>
+                            <field name="product_id"/>
+                            <field name="reserved_quantity"/>
+                            <field name="state" widget="badge"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
