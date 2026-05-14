@@ -12,7 +12,8 @@
         1. Monthly Revenue Collection   — bar chart, last 12 months
         2. Monthly Overheads            — bar chart, last 12 months
         3. Office Expenses & Maintenance — categorised horizontal bars, YTD
-        4. Vendor Payment Requests      — pending bills from Procurement / Vendor modules
+        4. Pending Approvals            — count + drill-down list (invoices, bills, POs)
+        5. Vendor Payment Requests      — pending bills from Procurement / Vendor modules
 
         Access Control:
         ─────────────────────────────────────────────────────────
