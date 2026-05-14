@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_purchaseorder_document_tts">
+        <t t-set="company" t-value="o.company_id or res_company"/>
+        <div class="page" style="font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 9px; color: #000; width: 100%; max-width: 100%; margin: 0; padding: 0;">
+            <style>
+                * { box-sizing: border-box; }
+
+                .tts-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    table-layout: fixed;
+                    word-wrap: break-word;
+                }
+                .tts-table td,
+                .tts-table th {
+                    border: 1px solid #000;
+                    padding: 3px 5px;
+                    vertical-align: top;
+                    font-size: 9px;
+                    font-family: 'DejaVu Sans', Arial, sans-serif;
+                }
+
+                .tts-section { margin-top: -1px; }
+
+                .tts-title {
+                    text-align: center;
+                    font-weight: bold;
+                    font-size: 12px;
+                    padding: 4px 0;
+                    border: 1px solid #000;
+                    border-top: none;
+                    background: #fff;
+                    font-family: 'DejaVu Sans', Arial, sans-serif;
+                }
+
+                .tts-label  { font-weight: bold; }
+                .tts-right  { text-align: right; }
+                .tts-center { text-align: center; }
+
+                .tts-inner        { width: 100%; border-collapse: collapse; table-layout: fixed; }
+                .tts-inner td     { border: none; padding: 2px 4px; font-size: 9px; vertical-align: top; font-family: 'DejaVu Sans', Arial, sans-serif; }
+                .tts-inner td.key { font-weight: bold; width: 42%; }
+
+                .tts-lines thead th {
+                    background: #f2f2f2;
+                    font-weight: bold;
+                    text-align: center;
+                    font-size: 9px;
+                    font-family: 'DejaVu Sans', Arial, sans-serif;
+                }
+
+                .totals-wrap  { width: 45%; padding: 0; border: none !important; }
+                .totals-empty { width: 55%; border: none !important; padding: 0 !important; background: transparent; }
+                .totals-inner { width: 100%; border-collapse: collapse; }
+                .totals-inner td {
+                    border: 1px solid #000;
+                    padding: 3px 6px;
+                    font-size: 9px;
+                    font-family: 'DejaVu Sans', Arial, sans-serif;
+                }
+                .totals-lbl   { font-weight: bold; }
+                .totals-val   { text-align: right; }
+                .totals-gross { background: #f2f2f2; font-weight: bold; }
+
+                .tts-footer-note {
+                    text-align: center;
+                    font-size: 8px;
+                    font-style: italic;
+                    margin-top: 8px;
+                    font-family: 'DejaVu Sans', Arial, sans-serif;
+                }
+
+                .page { padding: 0 !important; margin: 0 !important; }
+            </style>
+
+            <!-- ═══════════════════════════════════════════════
+                 HEADER: Registered Office + Billing Address
+            ════════════════════════════════════════════════ -->
+            <table class="tts-table">
+                <tr>
+                    <td style="width: 50%;">
+                        <div class="tts-label">Registered Office:</div>
+                        <div style="margin-top: 5px;">
+                            <img t-if="company.logo"
+                                 t-att-src="image_data_uri(company.logo)"
+                                 style="max-height: 55px; max-width: 150px; margin-bottom: 4px;"/>
+                            <div><strong><span t-field="company.name"/></strong></div>
+                            <div><span t-field="company.partner_id"
+                                       t-options='{"widget": "contact", "fields": ["address"], "no_marker": true}'/></div>
+                            <div>Tel No : <span t-esc="company.phone or ''"/></div>
+                            <div>Fax No :</div>
+                            <div>CIN : <span t-esc="company.company_registry or ''"/></div>
+                        </div>
+                    </td>
+
+                    <td style="width: 50%;">
+                        <t t-set="bill" t-value="o.partner_id"/>
+                        <div class="tts-label">Billing Address:</div>
+                        <div style="margin-top: 5px;">
+                            <div><strong><span t-field="bill.name"/></strong></div>
+                            <div t-if="bill.street"><span t-field="bill.street"/></div>
+                            <div t-if="bill.street2"><span t-field="bill.street2"/></div>
+                            <div>
+                                <span t-if="bill.city" t-field="bill.city"/>
+                                <span t-if="bill.state_id">, <span t-field="bill.state_id.name"/></span>
+                            </div>
+                            <div>PIN : <span t-esc="bill.zip or ''"/></div>
+                            <div>
+                                State Code :- <span t-esc="bill.state_id.code or ''"/>
+                                  GST No :- <span t-esc="bill.vat or ''"/>
+                            </div>
+                        </div>
+
+                        <t t-set="ship" t-value="o.dest_address_id or o.picking_type_id.warehouse_id.partner_id or company.partner_id"/>
+                        <div class="tts-label" style="margin-top: 7px;">Delivery Address:</div>
+                        <div t-if="ship" style="margin-top: 3px;">
+                            <div><span t-field="ship.name"/></div>
+                            <div t-if="ship.street"><span t-field="ship.street"/></div>
+                            <div t-if="ship.city">
+                                <span t-field="ship.city"/>
+                                <span t-if="ship.state_id">, <span t-field="ship.state_id.name"/></span>
+                            </div>
+                            <div>PIN : <span t-esc="ship.zip or ''"/></div>
+                            <div>
+                                State Code :- <span t-esc="ship.state_id.code or ''"/>
+                                  Place Of Supply :- <span t-esc="ship.state_id.name or ''"/>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- ═══════════════════════════════════════════════
+                 TITLE
+            ════════════════════════════════════════════════ -->
+            <div class="tts-title">Purchase Order</div>
+
+            <!-- ═══════════════════════════════════════════════
+                 SUPPLIER + PO BLOCK
+            ════════════════════════════════════════════════ -->
+            <table class="tts-table tts-section">
+                <tr>
+                    <td style="width: 50%;">
+                        <table class="tts-inner">
+                            <tr>
+                                <td class="key tts-label">Supplier Name</td>
+                                <td>: <span t-esc="o.partner_id.name or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="key tts-label">Branch</td>
+                                <td>: <span t-esc="o.partner_id.parent_id.name or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="key tts-label">State Code</td>
+                                <td>: <span t-esc="o.partner_id.state_id.code or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="key tts-label">Tel No</td>
+                                <td>: <span t-esc="o.partner_id.phone or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="key tts-label">Contact Person</td>
+                                <td>: <span t-esc="o.partner_id.name or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="key tts-label">Email</td>
+                                <td>: <span t-esc="o.partner_id.email or ''"/></td>
+                            </tr>
+                        </table>
+                    </td>
+
+                    <td style="width: 50%;">
+                        <table class="tts-inner">
+                            <tr>
+                                <td class="key tts-label">PO Number</td>
+                                <td>: <span t-esc="o.name or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="key tts-label">PO Release Date</td>
+                                <td>: <span t-field="o.date_order" t-options='{"widget": "date"}'/></td>
+                            </tr>
+                            <tr>
+                                <td class="key tts-label">Validity End Date</td>
+                                <td>: <span t-if="o.validity_end_date"
+                                           t-field="o.validity_end_date"
+                                           t-options='{"widget": "date"}'/></td>
+                            </tr>
+<!--                            <tr>-->
+<!--                                <td class="key tts-label">Our Ref</td>-->
+<!--                                <td>: <span t-esc="o.our_ref or ''"/></td>-->
+<!--                            </tr>-->
+<!--                            <tr>-->
+<!--                                <td class="key tts-label">Your Ref</td>-->
+<!--                                <td>: <span t-esc="o.partner_ref or ''"/></td>-->
+<!--                            </tr>-->
+                            <tr>
+                                <td class="key tts-label">Contact Person</td>
+                                <td>: <span t-esc="o.user_id.name or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="key tts-label">Email &amp; Tel No</td>
+                                <td>: <span t-esc="o.user_id.email or ''"/>
+                                    <t t-if="o.user_id.partner_id.phone">
+                                        / <span t-esc="o.user_id.partner_id.phone"/>
+                                    </t>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- ═══════════════════════════════════════════════
+                 LINE ITEMS
+            ════════════════════════════════════════════════ -->
+            <table class="tts-table tts-lines tts-section">
+                <thead>
+                    <tr>
+                        <th style="width: 4%;">SR No</th>
+                        <th style="width: 13%;">Material Name</th>
+                        <th style="width: 22%;">Description Of Goods</th>
+                        <th style="width: 9%;">HSN Code</th>
+                        <th style="width: 6%;">UOM</th>
+<!--                        <th style="width: 7%;">Scheduled Del Dt</th>-->
+                        <th style="width: 6%;">Qty</th>
+                        <th style="width: 6%;">GST%</th>
+                        <th style="width: 6%;">Disc.</th>
+                        <th style="width: 10%;">Rate/Unit</th>
+                        <th style="width: 11%;">Amount (INR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-set="line_no" t-value="0"/>
+                    <t t-foreach="o.order_line" t-as="line">
+                        <t t-if="not line.display_type">
+                            <t t-set="line_no" t-value="line_no + 1"/>
+                            <t t-set="gst_pct" t-value="sum(line.tax_ids.filtered(lambda t: t.amount_type == 'percent').mapped('amount'))"/>
+                            <tr>
+                                <td class="tts-center"><span t-esc="line_no"/></td>
+                                <td><span t-esc="line.product_id.name or ''"/></td>
+                                <td><span t-esc="line.name or ''"/></td>
+                                <td><span t-esc="line.product_id.default_code or line.product_id.categ_id.name or ''"/></td>
+                                <td class="tts-center"><span t-esc="line.product_uom_id.name or ''"/></td>
+<!--                                <td class="tts-center">-->
+<!--                                    <span t-if="line.date_planned"-->
+<!--                                          t-field="line.date_planned"-->
+<!--                                          t-options='{"widget": "date"}'/>-->
+<!--                                </td>-->
+                                <td class="tts-right"><span t-esc="'%.2f' % line.product_qty"/></td>
+                                <td class="tts-right"><span t-esc="'%.2f' % gst_pct"/>%</td>
+                                <td class="tts-right"><span t-esc="'%.2f' % (line.discount or 0.0)"/>%</td>
+                                <td class="tts-right">Rs. <span t-esc="'{:,.2f}'.format(line.price_unit)"/></td>
+                                <td class="tts-right">Rs. <span t-esc="'{:,.2f}'.format(line.price_subtotal)"/></td>
+                            </tr>
+                        </t>
+                    </t>
+                </tbody>
+            </table>
+
+
+            <!-- ═══════════════════════════════════════════════
+                 TOTALS
+            ════════════════════════════════════════════════ -->
+            <table class="tts-table tts-section">
+                <tr>
+                    <!-- LEFT SIDE -->
+                    <td style="width: 45%; border: 1px solid #000; vertical-align: top; padding: 10px;">
+                        <strong>Scheduled Del Dt :</strong>
+                        <span t-if="o.order_line and o.order_line[0].date_planned"
+                              t-field="o.order_line[0].date_planned"
+                              t-options='{"widget": "date"}'/>
+                    </td>
+
+                    <!-- RIGHT SIDE -->
+                    <td style="width: 55%; padding: 0;">
+                        <table class="totals-inner" style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td class="totals-lbl" style="width: 55%;">Total</td>
+                                <td class="totals-val">Rs.
+                                    <span t-esc="'{:,.2f}'.format(o.amount_untaxed)"/>
+                                </td>
+                            </tr>
+<!--                            <tr>-->
+<!--                                <td class="totals-lbl">Freight Charge</td>-->
+<!--                                <td class="totals-val">Rs.-->
+<!--                                    <span t-esc="'{:,.2f}'.format(o.freight_charge or 0.0)"/>-->
+<!--                                </td>-->
+<!--                            </tr>-->
+<!--                            <tr>-->
+<!--                                <td class="totals-lbl">CGST</td>-->
+<!--                                <td class="totals-val">Rs.-->
+<!--                                    <span t-esc="'{:,.2f}'.format(o.amount_cgst or 0.0)"/>-->
+<!--                                </td>-->
+<!--                            </tr>-->
+<!--                            <tr>-->
+<!--                                <td class="totals-lbl">SGST</td>-->
+<!--                                <td class="totals-val">Rs.-->
+<!--                                    <span t-esc="'{:,.2f}'.format(o.amount_sgst or 0.0)"/>-->
+<!--                                </td>-->
+<!--                            </tr>-->
+<!--                            <tr>-->
+<!--                                <td class="totals-lbl">Packing Tax</td>-->
+<!--                                <td class="totals-val">Rs.-->
+<!--                                    <span t-esc="'{:,.2f}'.format(o.packing_tax or 0.0)"/>-->
+<!--                                </td>-->
+<!--                            </tr>-->
+                            <tr>
+                                <td class="totals-lbl totals-gross">Gross Amount</td>
+                                <td class="totals-val totals-gross">
+                                    <strong>Rs.
+                                        <span t-esc="'{:,.2f}'.format(o.amount_gross or 0.0)"/>
+                                    </strong>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- ═══════════════════════════════════════════════
+                 AMOUNT IN WORDS
+            ════════════════════════════════════════════════ -->
+            <table class="tts-table tts-section">
+                <tr>
+                    <td class="tts-label" style="width: 22%;">Amount in Words:</td>
+                    <td><span t-esc="o.amount_in_words()"/></td>
+                </tr>
+            </table>
+
+            <!-- ═══════════════════════════════════════════════
+                 NOTES / DELIVERY / INCO / PAYMENT / REMARK
+            ════════════════════════════════════════════════ -->
+            <table class="tts-table tts-section">
+                <tr>
+                    <td class="tts-label" style="width: 22%;">Notes</td>
+                    <td>Terms and Conditions of Purchase Order printed overleaf and strictly adhere to the same.</td>
+                </tr>
+                <tr>
+                    <td class="tts-label">Delivery Address</td>
+                    <td>
+                        <t t-set="ship2" t-value="o.dest_address_id or o.picking_type_id.warehouse_id.partner_id or company.partner_id"/>
+                        <div t-if="ship2">
+                            <div><span t-esc="ship2.name or ''"/></div>
+                            <div t-if="ship2.street"><span t-esc="ship2.street"/></div>
+                            <div t-if="ship2.street2"><span t-esc="ship2.street2"/></div>
+                            <div>
+                                <span t-if="ship2.city" t-esc="ship2.city"/>
+                                <span t-if="ship2.state_id">, <span t-esc="ship2.state_id.name"/></span>
+                                <span t-if="ship2.zip"> - <span t-esc="ship2.zip"/></span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+<!--                <tr>-->
+<!--                    <td class="tts-label">Inco Terms:</td>-->
+<!--                    <td><span t-esc="o.incoterm_id.name or ''"/></td>-->
+<!--                </tr>-->
+<!--                <tr>-->
+<!--                    <td class="tts-label">Payment Terms:</td>-->
+<!--                    <td><span t-esc="o.payment_term_id.name or ''"/></td>-->
+<!--                </tr>-->
+                <tr>
+                    <td class="tts-label">Remark:</td>
+                    <td><span t-esc="o.remark or ''"/></td>
+                </tr>
+            </table>
+
+            <!-- ═══════════════════════════════════════════════
+                 SIGNATURES
+            ════════════════════════════════════════════════ -->
+            <table class="tts-table tts-section" style="margin-top: 40px;">
+                <tr style="height: 60px;">
+                    <td class="tts-center" style="width: 33%; vertical-align: bottom;">Prepared by</td>
+                    <td class="tts-center" style="width: 33%; vertical-align: bottom;">Approved by</td>
+                    <td class="tts-center" style="width: 34%; vertical-align: bottom;">Authorized Signatory</td>
+                </tr>
+            </table>
+
+            <div class="tts-footer-note">
+                This is a computer-generated purchase order. No signature is required.
+            </div>
+        </div>
+    </template>
+
+    <template id="report_purchaseorder_tts">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="article" t-att-data-oe-model="o._name" t-att-data-oe-id="o.id">
+                    <t t-call="tts_purchase_order_report.report_purchaseorder_document_tts"/>
+                </div>
+
+                <p t-if="not o_last" style="page-break-after: always;"/>
+            </t>
+        </t>
+    </template>
+</odoo>

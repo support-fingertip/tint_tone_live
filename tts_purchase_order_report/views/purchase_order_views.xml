@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_purchase_order_form_tts" model="ir.ui.view">
+        <field name="name">purchase.order.form.tts.report</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_ref']" position="after">
+                <field name="our_ref"/>
+                <field name="validity_end_date"/>
+            </xpath>
+            <xpath expr="//page[@name='purchase_delivery_invoice']" position="before">
+                <page string="TTS Report Fields" name="tts_report_fields">
+                    <group>
+                        <group string="Additional Charges">
+                            <field name="freight_charge"/>
+                            <field name="packing_tax"/>
+                            <field name="amount_cgst"/>
+                            <field name="amount_sgst"/>
+                            <field name="amount_gross"/>
+                        </group>
+                        <group string="Remark">
+                            <field name="remark" nolabel="1"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
