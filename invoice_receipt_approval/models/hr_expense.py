@@ -9,12 +9,21 @@ class HrExpense(models.Model):
     inv_expense_is_account_manager = fields.Boolean(
         compute='_compute_inv_expense_groups',
     )
+    inv_expense_approval_required = fields.Boolean(
+        string='Approval Required',
+        compute='_compute_inv_expense_approval_required',
+    )
 
     @api.depends_context('uid')
     def _compute_inv_expense_groups(self):
         is_account_manager = self.env.user.has_group('account.group_account_manager')
         for expense in self:
             expense.inv_expense_is_account_manager = is_account_manager
+
+    @api.depends('state')
+    def _compute_inv_expense_approval_required(self):
+        for expense in self:
+            expense.inv_expense_approval_required = expense.state == 'submitted'
 
     @api.depends_context('uid')
     @api.depends('employee_id', 'state')

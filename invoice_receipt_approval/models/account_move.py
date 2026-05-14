@@ -60,13 +60,22 @@ class AccountMove(models.Model):
                 company.receipt_approval_active
                 and self.amount_total > company.receipt_approval_amount
             )
-        # Journal entries (payments, expenses, overheads) — Associates always require approval
+        if self.origin_payment_id:
+            return False
+        # Journal entries (expenses, overheads) — Associates require approval
         if self.move_type == 'entry':
             return True
         return False
 
     def action_post(self):
         for move in self:
+            if (
+                move.move_type in _APPROVAL_MOVE_TYPES
+                and move.inv_receipt_approval_state == 'rejected'
+            ):
+                raise UserError(
+                    "This document was rejected. Please update it and submit it for approval again."
+                )
             is_associate = (
                 move.env.user.has_group('account.group_account_invoice')
                 and not move.env.user.has_group('account.group_account_manager')
@@ -74,6 +83,8 @@ class AccountMove(models.Model):
             if not is_associate:
                 continue
             if move.inv_receipt_approval_state == 'approved':
+                continue
+            if move.origin_payment_id:
                 continue
             if move.move_type in _APPROVAL_MOVE_TYPES:
                 # Invoices / receipts: only block when above the configured threshold
