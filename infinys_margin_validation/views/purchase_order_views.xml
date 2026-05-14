@@ -134,12 +134,14 @@
                         type="object"
                         string="Approve Margin"
                         class="btn-success"
+                        groups="boq_management_v19.group_head_supplier_dashboard"
                         invisible="margin_approval_status != 'to_approve' or not is_margin_approver"
                         data-hotkey="y"/>
                 <button name="action_reject_margin"
                         type="object"
                         string="Reject Margin"
                         class="btn-danger"
+                        groups="boq_management_v19.group_head_supplier_dashboard"
                         invisible="margin_approval_status != 'to_approve' or not is_margin_approver"
                         data-hotkey="n"/>
             </xpath>
