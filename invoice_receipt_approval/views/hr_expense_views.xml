@@ -20,6 +20,20 @@
                 <xpath expr="//button[@name='action_refuse']" position="attributes">
                     <attribute name="groups">account.group_account_manager</attribute>
                 </xpath>
+                <xpath expr="//sheet" position="before">
+                    <div class="alert alert-warning text-center" role="alert"
+                         invisible="state != 'submitted'">
+                        <strong>Waiting for Approval</strong> - Submitted for approval. An accounts manager must approve before posting.
+                    </div>
+                    <div class="alert alert-success text-center" role="alert"
+                         invisible="state != 'approved'">
+                        <strong>Approved</strong> - This expense has been approved and is ready to post.
+                    </div>
+                    <div class="alert alert-danger text-center" role="alert"
+                         invisible="state != 'refused'">
+                        <strong>Rejected</strong> - This expense was refused. Update it and submit it again for approval.
+                    </div>
+                </xpath>
             </field>
         </record>
 
@@ -56,6 +70,23 @@
                             groups="account.group_account_manager"/>
                 </xpath>
             </field>
+        </record>
+
+        <record id="hr_expense.hr_expense_actions_my_all" model="ir.actions.act_window">
+            <field name="name">Expenses</field>
+            <field name="context">{}</field>
+        </record>
+
+        <record id="hr_expense.menu_hr_expense_my_expenses" model="ir.ui.menu">
+            <field name="name">Expenses</field>
+            <field name="parent_id" ref="hr_expense.menu_hr_expense_root"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="hr_expense.menu_hr_expense_my_expenses_all" model="ir.ui.menu">
+            <field name="name">Expenses</field>
+            <field name="parent_id" ref="hr_expense.menu_hr_expense_my_expenses"/>
+            <field name="action" ref="hr_expense.hr_expense_actions_my_all"/>
+            <field name="sequence">1</field>
         </record>
 
     </data>
