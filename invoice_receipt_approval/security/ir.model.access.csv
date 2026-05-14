@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_invoice_reject_wizard,invoice.reject.wizard,model_invoice_reject_wizard,account.group_account_manager,1,1,1,1
+access_hr_expense_refuse_wizard_account_manager,hr.expense.refuse.wizard.account.manager,hr_expense.model_hr_expense_refuse_wizard,account.group_account_manager,1,1,1,0
+access_hr_expense_approve_duplicate_account_manager,hr.expense.approve.duplicate.account.manager,hr_expense.model_hr_expense_approve_duplicate,account.group_account_manager,1,1,1,0
