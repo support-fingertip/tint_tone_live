@@ -22,6 +22,17 @@
         <field name="perm_unlink" eval="1"/>
     </record>
 
+    <record id="rule_associate_all_expenses" model="ir.rule">
+        <field name="name">Associates: All Expenses</field>
+        <field name="model_id" ref="hr_expense.model_hr_expense"/>
+        <field name="groups" eval="[(4, ref('account.group_account_invoice'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>
+
     <record id="rule_manager_all_account_moves" model="ir.rule">
         <field name="name">Account Managers: All Account Moves</field>
         <field name="model_id" ref="account.model_account_move"/>
