@@ -25,10 +25,10 @@
                             groups="account.group_account_invoice"
                             invisible="not inv_is_associate or not inv_approval_required or state != 'draft' or inv_receipt_approval_state not in ('none', 'rejected') or move_type == 'entry'"/>
 
-                    <!-- Manager: Approve directly when approval is required -->
+                    <!-- Manager: Approve only when an associate has submitted the document -->
                     <button name="action_approve_invoice" type="object"
                             string="Approve" class="btn-success"
-                            invisible="not inv_is_account_manager or not inv_approval_required or state != 'draft' or inv_receipt_approval_state not in ('none', 'rejected', 'submitted') or move_type == 'entry'"
+                            invisible="not inv_is_account_manager or inv_receipt_approval_state != 'submitted' or move_type == 'entry'"
                             groups="account.group_account_manager"/>
 
                     <!-- Admin: Reject (opens remark wizard) -->
@@ -43,7 +43,7 @@
                     and for everyone while the document is in the submitted state.
                 -->
                 <xpath expr="(//button[@name='action_post'])[2]" position="attributes">
-                    <attribute name="invisible">hide_post_button or move_type == 'entry' or display_inactive_currency_warning or ((inv_is_associate or inv_is_account_manager) and inv_approval_required and inv_receipt_approval_state != 'approved') or inv_receipt_approval_state == 'submitted'</attribute>
+                    <attribute name="invisible">hide_post_button or move_type == 'entry' or display_inactive_currency_warning or (inv_is_associate and inv_approval_required and inv_receipt_approval_state != 'approved') or inv_receipt_approval_state == 'submitted'</attribute>
                 </xpath>
 
                 <!-- Status banners -->
@@ -76,18 +76,11 @@
                 <!-- Colour submitted rows in amber -->
                 <xpath expr="//list" position="attributes">
                     <attribute name="decoration-warning">inv_receipt_approval_state == 'submitted'</attribute>
-                    <attribute name="decoration-danger">inv_receipt_approval_state == 'rejected'</attribute>
                 </xpath>
 
                 <!-- Approval state field + "To Approve" button before the payment status badge -->
                 <xpath expr="//field[@name='status_in_payment']" position="before">
-                    <field name="inv_approval_required" column_invisible="1"/>
-                    <field name="inv_receipt_approval_state" string="Approval Status" widget="badge"
-                           invisible="not inv_approval_required and inv_receipt_approval_state != 'rejected'"
-                           decoration-warning="inv_receipt_approval_state == 'submitted'"
-                           decoration-success="inv_receipt_approval_state == 'approved'"
-                           decoration-danger="inv_receipt_approval_state == 'rejected'"
-                           optional="show"/>
+                    <field name="inv_receipt_approval_state" column_invisible="1"/>
                     <button name="action_approve_invoice" type="object"
                             string="To Approve" class="btn-warning"
                             invisible="inv_receipt_approval_state != 'submitted'"
