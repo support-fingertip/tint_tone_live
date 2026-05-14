@@ -43,7 +43,7 @@
                     and for everyone while the document is in the submitted state.
                 -->
                 <xpath expr="(//button[@name='action_post'])[2]" position="attributes">
-                    <attribute name="invisible">hide_post_button or move_type == 'entry' or display_inactive_currency_warning or (inv_is_associate and inv_approval_required and inv_receipt_approval_state != 'approved') or inv_receipt_approval_state == 'submitted'</attribute>
+                    <attribute name="invisible">hide_post_button or move_type == 'entry' or display_inactive_currency_warning or (inv_is_associate and inv_approval_required and inv_receipt_approval_state != 'approved') or inv_receipt_approval_state in ('submitted', 'rejected')</attribute>
                 </xpath>
 
                 <!-- Status banners -->
