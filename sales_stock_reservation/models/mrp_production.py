@@ -29,6 +29,193 @@ class MrpProduction(models.Model):
         compute='_compute_auto_purchase_order_count',
         string='Auto PO Count')
 
+    # ============================================================
+    # RAW MATERIALS READY NOTIFICATION
+    # ============================================================
+
+    raw_materials_ready_notified = fields.Boolean(
+        string="Raw Materials Ready Notification Sent",
+        default=False, copy=False, readonly=True,
+        help="Set to True once the 'All Raw Materials Ready' notification "
+             "has been fired for this MO. Prevents duplicate notifications.")
+
+    def _are_all_raw_materials_ready(self):
+        """Return True if every raw-material move on this MO is fully
+        assigned (reserved). A move is ready when state='assigned' AND
+        the reserved quantity covers the requested quantity."""
+        self.ensure_one()
+        if not self.move_raw_ids:
+            return False
+        if self.state in ('done', 'cancel', 'draft'):
+            return False
+        for move in self.move_raw_ids:
+            if move.state == 'cancel':
+                continue
+            if move.state != 'assigned':
+                return False
+            reserved = sum(move.move_line_ids.mapped('quantity'))
+            if reserved < move.product_uom_qty:
+                return False
+        return True
+
+    def _check_and_notify_raw_materials_ready(self):
+        """Check readiness on each MO; if fully ready and not yet notified,
+        fire the email + chatter notification. Idempotent via the
+        raw_materials_ready_notified flag."""
+        for rec in self:
+            if rec.raw_materials_ready_notified:
+                continue
+            if rec.state in ('done', 'cancel', 'draft'):
+                continue
+            if not rec._are_all_raw_materials_ready():
+                continue
+            try:
+                rec._send_raw_materials_ready_notification()
+                rec.raw_materials_ready_notified = True
+            except Exception as e:
+                _logger.exception(
+                    "sales_stock_reservation: failed to send 'materials "
+                    "ready' notification for MO %s: %s",
+                    rec.display_name, e)
+
+    def _send_raw_materials_ready_notification(self):
+        """Build HTML body and email it to storekeepers + SO salesperson.
+        Also post chatter messages on the MO and the linked SO."""
+        self.ensure_one()
+
+        # ------------------------------------------------------------------
+        # Find the source SO line + order for context
+        # ------------------------------------------------------------------
+        so_line = self._find_source_sale_order_line()
+        sale_order = so_line.order_id if so_line else False
+
+        # ------------------------------------------------------------------
+        # Build the components table rows
+        # ------------------------------------------------------------------
+        rows_html = "".join([
+            "<tr>"
+            "<td style='padding:4px 8px;border:1px solid #ddd;'>%s</td>"
+            "<td style='padding:4px 8px;border:1px solid #ddd;text-align:right;'>%s</td>"
+            "<td style='padding:4px 8px;border:1px solid #ddd;'>%s</td>"
+            "<td style='padding:4px 8px;border:1px solid #ddd;text-align:center;'>"
+            "<span style='color:green;font-weight:bold;'>&#10004; Ready</span></td>"
+            "</tr>" % (
+                move.product_id.display_name,
+                move.product_uom_qty,
+                move.product_uom.name or '',
+            )
+            for move in self.move_raw_ids if move.state != 'cancel'
+        ])
+
+        # ------------------------------------------------------------------
+        # Build the full email body
+        # ------------------------------------------------------------------
+        body_html = (
+                        "<p><span style='color:green;font-size:16px;'>&#10004;</span> "
+                        "<strong>All raw materials are now ready for production.</strong></p>"
+                        "<p>Manufacturing Order <strong>%s</strong> "
+                        "(Product: <strong>%s</strong>, Qty: <strong>%s %s</strong>) "
+                        "has all components fully reserved at the source location. "
+                        "Production can begin.</p>"
+                        "<p><strong>Source Sale Order:</strong> %s<br/>"
+                        "<strong>Customer:</strong> %s</p>"
+                        "<table style='border-collapse:collapse;margin-top:8px;'>"
+                        "<thead><tr>"
+                        "<th style='padding:4px 8px;border:1px solid #ddd;background:#f5f5f5;'>Component</th>"
+                        "<th style='padding:4px 8px;border:1px solid #ddd;background:#f5f5f5;'>Required Qty</th>"
+                        "<th style='padding:4px 8px;border:1px solid #ddd;background:#f5f5f5;'>UoM</th>"
+                        "<th style='padding:4px 8px;border:1px solid #ddd;background:#f5f5f5;'>Status</th>"
+                        "</tr></thead>"
+                        "<tbody>%s</tbody>"
+                        "</table>"
+                        "<p style='margin-top:12px;'>Please proceed to schedule the "
+                        "production run.</p>"
+                    ) % (
+                        self.name,
+                        self.product_id.display_name,
+                        self.product_uom_qty,
+                        self.product_uom_id.name or '',
+                        sale_order.name if sale_order else '—',
+                        sale_order.partner_id.display_name if sale_order else '—',
+                        rows_html,
+                    )
+
+        subject = _(
+            "All Raw Materials Ready: %s"
+        ) % self.name
+
+        # ------------------------------------------------------------------
+        # Collect recipient emails
+        # ------------------------------------------------------------------
+        recipient_emails = []
+
+        # Storekeepers: all internal users in the Inventory User group
+        try:
+            stock_group = self.env.ref(
+                'stock.group_stock_user', raise_if_not_found=False)
+            if stock_group:
+                for user in stock_group.users:
+                    if user.partner_id.email and \
+                            user.partner_id.email not in recipient_emails:
+                        recipient_emails.append(user.partner_id.email)
+        except Exception:
+            pass
+
+        # SO salesperson
+        if sale_order and sale_order.user_id and \
+                sale_order.user_id.partner_id.email and \
+                sale_order.user_id.partner_id.email not in recipient_emails:
+            recipient_emails.append(sale_order.user_id.partner_id.email)
+
+        # MO's responsible user (if different)
+        if self.user_id and self.user_id.partner_id.email and \
+                self.user_id.partner_id.email not in recipient_emails:
+            recipient_emails.append(self.user_id.partner_id.email)
+
+        # ------------------------------------------------------------------
+        # Send the email
+        # ------------------------------------------------------------------
+        if recipient_emails:
+            try:
+                self.env['mail.mail'].sudo().create({
+                    'subject': subject,
+                    'body_html': body_html,
+                    'email_to': ", ".join(recipient_emails),
+                    'auto_delete': True,
+                }).send()
+            except Exception as e:
+                _logger.warning(
+                    "sales_stock_reservation: failed to send 'materials "
+                    "ready' email for MO %s: %s", self.name, e)
+
+        # ------------------------------------------------------------------
+        # Post chatter message on the MO
+        # ------------------------------------------------------------------
+        from markupsafe import Markup
+        self.message_post(
+            body=Markup(body_html),
+            subject=subject,
+        )
+
+        # ------------------------------------------------------------------
+        # Post a brief chatter message on the linked SO
+        # ------------------------------------------------------------------
+        if sale_order:
+            so_body = (
+                          "<p><span style='color:green;font-size:16px;'>&#10004;</span> "
+                          "All raw materials are ready for MO <strong>%s</strong>. "
+                          "Production can begin.</p>"
+                      ) % self.name
+            sale_order.message_post(
+                body=Markup(so_body),
+                subject="MO %s — Materials Ready" % self.name,
+            )
+
+        _logger.info(
+            "sales_stock_reservation: sent 'all raw materials ready' "
+            "notification for MO %s.", self.name)
+
+
     def _compute_auto_purchase_order_count(self):
         for rec in self:
             rec.auto_purchase_order_count = len(rec.auto_purchase_order_ids)
