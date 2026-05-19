@@ -19,11 +19,11 @@
                     <field name="inv_is_account_manager" invisible="1"/>
                     <field name="inv_approval_required" invisible="1"/>
 
-                    <!-- Invoice user: Submit for Approval — only shown when approval is actually required -->
+                    <!-- Non-manager accounting users: Submit for Approval — only shown when approval is actually required -->
                     <button name="action_submit_for_approval" type="object"
                             string="Submit for Approval" class="btn-primary"
                             groups="account.group_account_invoice"
-                            invisible="not inv_is_associate or not inv_approval_required or state != 'draft' or inv_receipt_approval_state not in ('none', 'rejected') or move_type == 'entry'"/>
+                            invisible="inv_is_account_manager or not inv_approval_required or state != 'draft' or inv_receipt_approval_state not in ('none', 'rejected') or move_type == 'entry'"/>
 
                     <!-- Manager: Approve only when an associate has submitted the document -->
                     <button name="action_approve_invoice" type="object"
@@ -39,11 +39,11 @@
                 </xpath>
 
                 <!--
-                    Hide the Confirm button for associates when approval is required and not yet approved,
+                    Hide the Confirm button for non-manager accounting users when approval is required and not yet approved,
                     and for everyone while the document is in the submitted state.
                 -->
                 <xpath expr="(//button[@name='action_post'])[2]" position="attributes">
-                    <attribute name="invisible">hide_post_button or move_type == 'entry' or display_inactive_currency_warning or (inv_is_associate and inv_approval_required and inv_receipt_approval_state != 'approved') or inv_receipt_approval_state in ('submitted', 'rejected')</attribute>
+                    <attribute name="invisible">hide_post_button or move_type == 'entry' or display_inactive_currency_warning or (not inv_is_account_manager and inv_approval_required and inv_receipt_approval_state != 'approved') or inv_receipt_approval_state in ('submitted', 'rejected')</attribute>
                 </xpath>
 
                 <!-- Status banners -->
