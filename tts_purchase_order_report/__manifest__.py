@@ -13,6 +13,8 @@
         'reports/purchase_order_report.xml',
         'reports/invoice_report.xml',
         'reports/invoice_template.xml',
+        'reports/payments_report.xml',
+        'reports/payments_templeate.xml',
     ],
     'installable': True,
     'application': False,

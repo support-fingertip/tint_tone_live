@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_payment_receipt_document_inherit"
+              inherit_id="account.report_payment_receipt_document"
+              priority="99">
+        <xpath expr="//t[@t-call='web.external_layout']" position="replace">
+
+            <div class="page o_tts_receipt" style="font-family: Arial, sans-serif; color: #3C3C3C; font-size: 13px; box-sizing: border-box; width: 100%; padding: 0 20px;">
+
+                <style>
+                    .o_tts_receipt,
+                    .o_tts_receipt table,
+                    .o_tts_receipt tr,
+                    .o_tts_receipt td,
+                    .o_tts_receipt th {
+                        box-sizing: border-box;
+                    }
+                    .o_tts_receipt table,
+                    .o_tts_receipt tr,
+                    .o_tts_receipt td,
+                    .o_tts_receipt th {
+                        border: none !important;
+                    }
+                </style>
+
+                <t t-set="inr_currency" t-value="env.ref('base.INR', raise_if_not_found=False)"/>
+                <t t-set="company" t-value="o.company_id"/>
+
+                <table border="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border:0 !important; margin-bottom: 10px;">
+                    <tr>
+                        <td style="border:0 !important; vertical-align: bottom; width: 50%; color: #3C3C3C; padding-top: 80px;">
+                            <div style="font-size: 30px; font-weight: 700; letter-spacing: 4px; color: #3C3C3C;">PAYMENT</div>
+                        </td>
+                        <td style="border:0 !important; vertical-align: top; width: 50%; text-align: right; color: #3C3C3C; line-height: 1.6; font-size: 12px;">
+                            <div t-if="company.logo" style="margin-bottom: 8px;">
+                                <img t-att-src="image_data_uri(company.logo)" alt="Logo" style="max-height: 60px; max-width: 180px;"/>
+                            </div>
+                            <div style="font-weight: 700; font-size: 14px; color: #3C3C3C; margin-bottom: 2px;" t-field="company.name"/>
+                            <div t-if="company.street" style="color: #3C3C3C;" t-field="company.street"/>
+                            <div t-if="company.street2" style="color: #3C3C3C;" t-field="company.street2"/>
+                            <div t-if="company.city or company.zip" style="color: #3C3C3C;">
+                                <span t-field="company.city"/><t t-if="company.zip"> - <span t-field="company.zip"/></t>
+                            </div>
+                            <div t-if="company.state_id" style="color: #3C3C3C;" t-field="company.state_id.name"/>
+                            <div t-if="company.country_id" style="color: #3C3C3C;" t-field="company.country_id.name"/>
+                            <div t-if="company.email" style="color: #3C3C3C;" t-field="company.email"/>
+                            <div t-if="company.vat" style="color: #3C3C3C;">GSTIN - <span t-field="company.vat"/></div>
+                        </td>
+                    </tr>
+                </table>
+
+                <div style="margin: 8px 0 25px 0;"></div>
+
+                <table border="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border:0 !important; margin-bottom: 30px;">
+                    <tr>
+                        <td style="border:0 !important; vertical-align: top; width: 50%; padding-right: 25px; padding-bottom: 30px; color: #3C3C3C;">
+                            <div style="font-weight: 700; font-size: 13px; color: #3C3C3C; margin-bottom: 8px;">Amount Received</div>
+                            <div style="font-size: 34px; font-weight: 700; color: #3C3C3C; margin-bottom: 6px;">
+                                <span style="font-family: 'DejaVu Sans', Arial, sans-serif;">&#8377;</span><span t-esc="'{:,.2f}'.format(o.amount)"/>
+                            </div>
+                            <div style="font-weight: 600; font-size: 13px; color: #3C3C3C; margin-bottom: 40px;">
+                                (<span t-if="inr_currency" t-esc="inr_currency.amount_to_text(o.amount).replace(inr_currency.currency_unit_label, 'Only')"/><span t-else="" t-esc="o.currency_id.amount_to_text(o.amount).replace(o.currency_id.currency_unit_label, 'Only')"/>)
+                            </div>
+                            <div style="font-weight: 700; font-size: 13px; color: #3C3C3C; margin-bottom: 8px;">Received From</div>
+                            <div style="color: #3C3C3C; line-height: 1.7; font-size: 13px;">
+                                <div style="font-weight: 700; color: #3C3C3C;" t-field="o.partner_id.name"/>
+                                <div t-if="o.partner_id.street" style="color: #3C3C3C;" t-field="o.partner_id.street"/>
+                                <div t-if="o.partner_id.street2" style="color: #3C3C3C;" t-field="o.partner_id.street2"/>
+                                <div t-if="o.partner_id.city" style="color: #3C3C3C;">
+                                    <span t-field="o.partner_id.city"/><t t-if="o.partner_id.zip"> - <span t-field="o.partner_id.zip"/></t>
+                                </div>
+                                <div t-if="o.partner_id.state_id" style="color: #3C3C3C;" t-field="o.partner_id.state_id.name"/>
+                                <div t-if="o.partner_id.country_id" style="color: #3C3C3C;" t-field="o.partner_id.country_id.name"/>
+                            </div>
+                        </td>
+                        <td style="border:0 !important; vertical-align: top; width: 50%; padding-left: 35px; padding-bottom: 30px; color: #3C3C3C;">
+                            <table border="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border:0 !important; color: #3C3C3C;">
+                                <tr>
+                                    <td style="border:0 !important; padding: 8px 0; width: 45%; font-size: 13px; color: #3C3C3C;">Payment Date</td>
+                                    <td style="border:0 !important; padding: 8px 0; font-weight: 700; font-size: 13px; color: #3C3C3C;">
+                                        <span t-field="o.date" t-options='{"format": "dd/MM/yyyy"}'/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border:0 !important; padding: 8px 0; font-size: 13px; color: #3C3C3C;">Reference Number</td>
+                                    <td style="border:0 !important; padding: 8px 0; font-weight: 700; font-size: 13px; color: #3C3C3C;">
+                                        <span t-field="o.memo"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border:0 !important; padding: 8px 0; font-size: 13px; color: #3C3C3C;">Payment Mode</td>
+                                    <td style="border:0 !important; padding: 8px 0; font-weight: 700; font-size: 13px; color: #3C3C3C;">
+                                        <span t-field="o.payment_method_line_id.name"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <div style="margin: 20px 0;"></div>
+
+                <div style="height: 120px;"></div>
+
+                <table border="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border:0 !important; margin-bottom: 200px;">
+                    <tr>
+                        <td style="border:0 !important; width: 60%;"></td>
+                        <td style="border:0 !important; width: 40%; text-align: center; color: #3C3C3C;">
+                            <div style="font-weight: 700; font-size: 13px; color: #3C3C3C; margin-bottom: 50px;">Authorized Signature</div>
+                            <div style="width: 80%; margin: 0 auto;"></div>
+                        </td>
+                    </tr>
+                </table>
+
+                <div style="margin: 20px 0 15px 0;"></div>
+
+                <div style="color: #3C3C3C; font-size: 13px;">
+                    <div style="font-weight: 700; color: #3C3C3C; margin-bottom: 8px;">Over payment</div>
+                    <div style="color: #3C3C3C;">
+                        <span style="font-family: 'DejaVu Sans', Arial, sans-serif;">&#8377;</span><span t-esc="'{:,.2f}'.format(o.amount)"/>
+                    </div>
+                </div>
+
+            </div>
+
+        </xpath>
+    </template>
+    
+    <template id="account.report_payment_receipt">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="article" t-att-data-oe-model="o._name" t-att-data-oe-id="o.id">
+                    <t t-call="account.report_payment_receipt_document" t-lang="o.partner_id.lang"/>
+                </div>
+                <p t-if="not o_last" style="page-break-after: always;"/>
+            </t>
+        </t>
+    </template>
+
+</odoo>
