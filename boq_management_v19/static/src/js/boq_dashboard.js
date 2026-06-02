@@ -437,7 +437,7 @@ export class HeadSupplierDashboard extends BoqManagerDashboardBase {
     static template       = "boq_management_v19.HeadSupplierDashboard";
 
     get isHeadDashboard()   { return true; }
-    get dashboardTitle()    { return "Head of Supplier Dashboard"; }
+    get dashboardTitle()    { return "Head of Supply Chain"; }
     get dashboardSubtitle() { return "Consolidated multi-company supplier & procurement view"; }
     get dashboardIcon()     { return "fa-globe"; }
     get partnerLabel()      { return "Partner"; }
