@@ -90,6 +90,33 @@ class PurchaseOrderLine(models.Model):
     # UI ONCHANGES  (bidirectional)
     # =========================================================================
 
+    @api.onchange('product_id')
+    def _onchange_product_id_margin(self):
+        """
+        When product changes, auto-load the Required Margin (%) from
+        Vendor Margin Thresholds (margin.threshold.config) based on the
+        product's category (Trade).  The existing price_unit onchange will
+        then compute Selling Price automatically.
+        """
+        for line in self:
+            if not line.product_id:
+                continue
+            threshold = self.env['margin.threshold.config'].search([
+                ('category_id', '=', line.product_id.categ_id.id),
+                ('company_id', '=', (line.order_id.company_id.id or self.env.company.id)),
+            ], limit=1)
+            if threshold:
+                line.required_margin = threshold.minimum_margin
+                # Also recompute selling price if cost is already known
+                cost = line.price_unit or 0.0
+                if cost and threshold.minimum_margin:
+                    try:
+                        line.customer_price = self._calc_selling_price(
+                            cost, threshold.minimum_margin
+                        )
+                    except ValidationError:
+                        pass
+
     @api.onchange('required_margin', 'price_unit')
     def _onchange_required_margin(self):
         """
@@ -124,15 +151,50 @@ class PurchaseOrderLine(models.Model):
     # created/updated by server-side code (e.g. BOQ → Create RFQ).
     # =========================================================================
 
+    def _get_threshold_margin(self, categ_id, company_id):
+        """Return minimum_margin from threshold config for a given category, or 0."""
+        if not categ_id:
+            return 0.0
+        threshold = self.env['margin.threshold.config'].search([
+            ('category_id', '=', categ_id),
+            ('company_id', '=', company_id or self.env.company.id),
+        ], limit=1)
+        return threshold.minimum_margin if threshold else 0.0
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
             cp = vals.get('customer_price') or 0.0
             pu = vals.get('price_unit') or 0.0
-            # Back-fill required_margin if customer_price is set (e.g. BOQ→RFQ)
+
+            # Auto-load required_margin from threshold if not supplied
+            if 'required_margin' not in vals or not vals.get('required_margin'):
+                product_id = vals.get('product_id')
+                if product_id:
+                    product = self.env['product.product'].browse(product_id)
+                    order_id = vals.get('order_id')
+                    company_id = False
+                    if order_id:
+                        order = self.env['purchase.order'].browse(order_id)
+                        company_id = order.company_id.id
+                    threshold_margin = self._get_threshold_margin(
+                        product.categ_id.id, company_id
+                    )
+                    if threshold_margin:
+                        vals['required_margin'] = threshold_margin
+                        # Forward-fill customer_price from threshold margin + cost
+                        if pu and not cp:
+                            try:
+                                vals['customer_price'] = self._calc_selling_price(
+                                    pu, threshold_margin
+                                )
+                            except ValidationError:
+                                pass
+
+            # Back-fill required_margin from customer_price if still missing
             if cp and 'required_margin' not in vals:
                 vals['required_margin'] = self._calc_margin_pct(cp, pu)
-            # Forward-fill customer_price if required_margin is set
+            # Forward-fill customer_price from required_margin if cost known
             elif vals.get('required_margin') and pu and not cp:
                 try:
                     vals['customer_price'] = self._calc_selling_price(
