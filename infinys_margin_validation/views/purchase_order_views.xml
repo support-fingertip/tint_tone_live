@@ -27,9 +27,58 @@
                 </attribute>
             </xpath>
 
-            <!-- Margin (%) column on order lines -->
+            <!-- Margin-Based Pricing columns on order lines (visible to vendor group only) -->
+            <!--
+                Gross Margin Pricing formula:
+                    Selling Price = Vendor Cost / (1 − Margin%)
+                Example: Cost ₹100 @ 40% margin → SP = 100/(1−0.40) = ₹166.67
+
+                Workflow:
+                  1. User enters "Required Margin (%)" → Customer Price auto-computes.
+                  2. OR user enters "Customer Price" directly → Required Margin back-fills.
+                  3. "Margin (%)" is the live gross-margin, recomputed whenever cost/SP changes.
+            -->
+            <!--
+                GROSS MARGIN PRICING  (Margin-Based Pricing)
+                ─────────────────────────────────────────────
+                Formula : Selling Price = Vendor Cost / (1 − Margin%)
+                Example : Cost ₹100 @ 40%  →  100 / 0.60 = ₹166.67
+
+                Workflow (bidirectional):
+                  A) Enter "Req. Margin (%)"  → Selling Price auto-fills
+                  B) Enter "Selling Price"     → Req. Margin % back-fills
+                  C) "Margin (%)" column       → readonly live gross margin
+            -->
             <xpath expr="//field[@name='order_line']//list//field[@name='price_subtotal']" position="after">
-                <field name="margin_percentage" string="Margin (%)" widget="float" options="{'digits': [16, 2]}" readonly="1" groups="boq_management_v19.group_vendor"/>
+
+                <!-- A: Required Margin input — triggers SP computation -->
+                <field name="required_margin"
+                       string="Req. Margin (%)"
+                       widget="float"
+                       options="{'digits': [16, 2]}"
+                       optional="show"
+                       column_invisible="parent.partner_type == 'supplier'"
+                       groups="boq_management_v19.group_vendor"/>
+
+                <!-- B: Selling Price — editable, also auto-filled when margin is entered -->
+                <field name="customer_price"
+                       string="Selling Price"
+                       widget="float"
+                       options="{'digits': [16, 2]}"
+                       optional="show"
+                       column_invisible="parent.partner_type == 'supplier'"
+                       groups="boq_management_v19.group_vendor"/>
+
+                <!-- C: Live gross margin % — readonly display -->
+                <field name="margin_percentage"
+                       string="Margin (%)"
+                       widget="float"
+                       options="{'digits': [16, 2]}"
+                       readonly="1"
+                       optional="show"
+                       column_invisible="parent.partner_type == 'supplier'"
+                       groups="boq_management_v19.group_vendor"/>
+
                 <field name="is_margin_below_threshold" column_invisible="1"/>
             </xpath>
 
@@ -134,14 +183,12 @@
                         type="object"
                         string="Approve Margin"
                         class="btn-success"
-                        groups="boq_management_v19.group_head_supplier_dashboard"
                         invisible="margin_approval_status != 'to_approve' or not is_margin_approver"
                         data-hotkey="y"/>
                 <button name="action_reject_margin"
                         type="object"
                         string="Reject Margin"
                         class="btn-danger"
-                        groups="boq_management_v19.group_head_supplier_dashboard"
                         invisible="margin_approval_status != 'to_approve' or not is_margin_approver"
                         data-hotkey="n"/>
             </xpath>
