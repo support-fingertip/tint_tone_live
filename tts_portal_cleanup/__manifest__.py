@@ -17,7 +17,7 @@
         Applied to all portal frontend visitors, including internal users
         previewing the portal page.
     """,
-    "author": "",
+    "author": "fingertip plus",
     "license": "LGPL-3",
     "depends": ["portal", "account"],
     "data": [

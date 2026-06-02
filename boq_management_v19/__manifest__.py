@@ -9,7 +9,7 @@
     'description': """
         BOQ Management
     """,
-    'author': '',
+    'author': 'fingertip plus',
     'category': 'Industries/Construction',
     'license': 'OPL-1',
     'depends': [

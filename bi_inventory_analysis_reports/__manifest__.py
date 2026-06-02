@@ -25,7 +25,7 @@ All Reports Include
 - Excel export via Odoo standard export
 
     """,
-    'author': '',
+    'author': 'Fingertipplus',
     'website': '',
     'category': 'Inventory/Reporting',
     'license': 'OPL-1',

@@ -20,7 +20,7 @@
         • Only users in  account.group_account_manager  see the dashboard menu.
         • Associate-level users have no access — the menu is not rendered for them.
     """,
-    "author": "",
+    "author": "fingertip plus",
     "license": "LGPL-3",
     "depends": ["base", "account", "web"],
     "data": [
