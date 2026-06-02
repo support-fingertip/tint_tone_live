@@ -694,6 +694,9 @@ class BoqBoq(models.Model):
         full set of companies the user can manage.  Dashboard methods that
         receive an explicit company_ids argument use that list directly.
         """
+        ctx_ids = self.env.context.get('allowed_company_ids')
+        if ctx_ids:
+            return list(ctx_ids)
         cids = self.env.user.sudo().company_ids.ids
         return cids if cids else [self.env.company.id]
 
@@ -795,16 +798,17 @@ class BoqBoq(models.Model):
         in the company filter, even when only one is active in the switcher.
         Returns: [{id, name, initial}] sorted by name.
         """
-        company_set = self.env.user.sudo().company_ids | self.env.company
-        ctx_ids = self.env.context.get('allowed_company_ids', [])
+        ctx_ids = self.env.context.get('allowed_company_ids')
         if ctx_ids:
-            company_set = company_set | self.env['res.company'].sudo().browse(ctx_ids)
+            companies = self.env['res.company'].sudo().browse(list(ctx_ids)).exists()
+        else:
+            companies = self.env.user.sudo().company_ids | self.env.company
 
         result = []
-        for company in company_set.sorted('name'):
+        for company in companies.sorted('name'):
             result.append({
-                'id':      company.id,
-                'name':    company.name,
+                'id': company.id,
+                'name': company.name,
                 'initial': (company.name or '?')[0].upper(),
             })
         return result
