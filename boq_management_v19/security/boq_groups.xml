@@ -75,12 +75,12 @@
         </record>
 
         <record id="privilege_head_supplier_dashboard" model="res.groups.privilege">
-            <field name="name">Head of Supplier Dashboard</field>
+            <field name="name">Head of Supply Chain</field>
             <field name="category_id" ref="module_category_tint_tone_shade_rights"/>
             <field name="sequence">70</field>
         </record>
         <record id="group_head_supplier_dashboard" model="res.groups">
-            <field name="name">Head of Supplier Dashboard</field>
+            <field name="name">Head of Supply Chain</field>
             <field name="privilege_id" ref="privilege_head_supplier_dashboard"/>
             <field name="implied_ids" eval="[(4, ref('group_boq_manager'))]"/>
         </record>
