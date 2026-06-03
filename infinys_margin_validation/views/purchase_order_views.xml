@@ -51,7 +51,6 @@
             -->
             <xpath expr="//field[@name='order_line']//list//field[@name='price_subtotal']" position="after">
 
-                <!-- A: Required Margin input — triggers SP computation -->
                 <field name="required_margin"
                        string="Req. Margin (%)"
                        widget="float"
@@ -60,16 +59,14 @@
                        column_invisible="parent.partner_type == 'supplier'"
                        groups="boq_management_v19.group_vendor"/>
 
-                <!-- B: Selling Price — editable, also auto-filled when margin is entered -->
                 <field name="customer_price"
                        string="Selling Price"
-                       widget="float"
-                       options="{'digits': [16, 2]}"
+                       widget="monetary"
+                       options="{'currency_field': 'currency_id'}"
                        optional="show"
                        column_invisible="parent.partner_type == 'supplier'"
                        groups="boq_management_v19.group_vendor"/>
 
-                <!-- C: Live gross margin % — readonly display -->
                 <field name="margin_percentage"
                        string="Margin (%)"
                        widget="float"
@@ -79,7 +76,18 @@
                        column_invisible="parent.partner_type == 'supplier'"
                        groups="boq_management_v19.group_vendor"/>
 
+                <!-- savings_percentage MUST be in the same xpath block, not separate -->
+                <field name="savings_percentage"
+                       string="Savings %"
+                       widget="float"
+                       options="{'digits': [16, 2]}"
+                       readonly="1"
+                       optional="show"
+                       column_invisible="parent.partner_type == 'supplier'"
+                       groups="boq_management_v19.group_vendor"/>
+
                 <field name="is_margin_below_threshold" column_invisible="1"/>
+
             </xpath>
 
             <!-- Warning message when margin is below threshold -->
