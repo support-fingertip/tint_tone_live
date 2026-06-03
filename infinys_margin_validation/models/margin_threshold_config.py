@@ -35,6 +35,6 @@ class MarginThresholdConfig(models.Model):
         default=lambda self: self.env.context.get('default_type', 'vendor'))
 
     _sql_constraints = [
-        ('unique_category_company_type', 'unique(category_id, company_id, type)',
-         'A threshold already exists for this product category, company and type.'),
+        ('unique_category_company', 'unique(category_id, company_id)',
+         'A threshold already exists for this product category in this company.'),
     ]
