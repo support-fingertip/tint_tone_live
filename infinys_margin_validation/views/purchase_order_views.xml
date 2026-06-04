@@ -79,6 +79,16 @@
                        column_invisible="parent.partner_type == 'supplier'"
                        groups="boq_management_v19.group_vendor"/>
 
+                 <!-- savings_percentage MUST be in the same xpath block, not separate -->
+                <field name="savings_percentage"
+                       string="Savings %"
+                       widget="float"
+                       options="{'digits': [16, 2]}"
+                       readonly="1"
+                       optional="show"
+                       column_invisible="parent.partner_type == 'supplier'"
+                       groups="boq_management_v19.group_vendor"/>
+
                 <field name="is_margin_below_threshold" column_invisible="1"/>
             </xpath>
 
