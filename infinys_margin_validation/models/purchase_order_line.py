@@ -1,52 +1,32 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models
-# from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError
 
 
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
-    # # =========================================================================
-    # # DB COLUMN BOOTSTRAP
-    # # _register_hook runs on EVERY server start (not just -u), so the column
-    # # is guaranteed to exist before any ORM create() hits the database.
-    # # =========================================================================
+    def _register_hook(self):
+        res = super()._register_hook()
+        self.env.cr.execute("""
+            ALTER TABLE purchase_order_line
+                ADD COLUMN IF NOT EXISTS required_margin NUMERIC DEFAULT 0.0;
+        """)
+        self.env.cr.execute("""
+            ALTER TABLE purchase_order_line
+                ADD COLUMN IF NOT EXISTS savings_percentage NUMERIC DEFAULT 0.0;
+        """)
+        return res
 
-    # def _register_hook(self):
-    #     res = super()._register_hook()
-    #     self.env.cr.execute("""
-    #         ALTER TABLE purchase_order_line
-    #             ADD COLUMN IF NOT EXISTS required_margin NUMERIC DEFAULT 0.0;
-    #     """)
-    #     return res
-
-    # # =========================================================================
-    # # GROSS MARGIN PRICING
-    # #
-    # # Formula : Selling Price = Vendor Cost / (1 − Margin%)
-    # # Example : Cost ₹100 @ 40% margin  →  100 / (1 − 0.40) = ₹166.67
-    # #
-    # # Fields involved
-    # #   price_unit      — vendor cost (what we PAY)          [existing]
-    # #   customer_price  — selling price (what we CHARGE)     [boq_management_v19]
-    # #   required_margin — desired gross margin %             [this module]
-    # #   margin_percentage — live gross margin (computed)     [this module]
-    # #
-    # # NOTE: customer_price is declared in boq_management_v19 which depends on
-    # # this module, so it cannot appear in @api.depends (circular load order).
-    # # It is accessed via getattr() in the compute body and re-triggered via
-    # # write() / create() overrides.
-    # # =========================================================================
-
-    # required_margin = fields.Float(
-    #     string="Required Margin (%)",
-    #     digits=(5, 2),
-    #     default=0.0,
-    #     help="Desired gross margin on the selling price.\n"
-    #          "Formula: Selling Price = Vendor Cost / (1 − Margin%)\n"
-    #          "Example: Cost ₹100 at 40% → Selling Price = ₹166.67",
-    # )
+    required_margin = fields.Float(
+        string="Required Margin (%)",
+        digits=(5, 2),
+        default=0.0,
+        help="Desired gross margin on the selling price.\n"
+             "Formula: Selling Price = Vendor Cost / (1 − Margin%)\n"
+             "Example: Cost ₹100 at 40% → Selling Price = ₹166.67",
+    )
 
     margin_percentage = fields.Float(
         string="Margin (%)",
@@ -55,141 +35,201 @@ class PurchaseOrderLine(models.Model):
         digits=(5, 2),
         help="Live gross margin: (Selling Price − Vendor Cost) / Selling Price × 100",
     )
+
+    # FIX: was showing 4000% because _calc_margin_pct already returns a %
+    # value (e.g. 40.0), but it was being multiplied by 100 again elsewhere.
+    # Now computed alongside margin_percentage — result stored directly as-is.
+    savings_percentage = fields.Float(
+        string="Savings %",
+        compute='_compute_margin_percentage',
+        store=True,
+        digits=(5, 2),
+        help="(Selling Price − Vendor Cost) / Selling Price × 100\n"
+             "Same formula as Margin (%). Stored directly — never ×100 again.",
+    )
+
     is_margin_below_threshold = fields.Boolean(
         string="Margin Below Threshold",
         compute='_compute_margin_percentage',
         store=True,
     )
 
-    # # =========================================================================
-    # # HELPERS
-    # # =========================================================================
+    # ── Helpers ──────────────────────────────────────────────────────────────
 
-    # @staticmethod
-    # def _calc_selling_price(cost, margin_pct):
-    #     """Selling Price = Cost / (1 − Margin%)  — gross margin formula."""
-    #     if margin_pct >= 100.0:
-    #         raise ValidationError(
-    #             "Required Margin cannot be 100% or more — "
-    #             "the selling price would be infinite."
-    #         )
-    #     if margin_pct < 0.0:
-    #         raise ValidationError("Required Margin cannot be negative.")
-    #     if margin_pct == 0.0:
-    #         return cost
-    #     return cost / (1.0 - margin_pct / 100.0)
+    @staticmethod
+    def _calc_selling_price(cost, margin_pct):
+        """Selling Price = Cost / (1 − Margin%)"""
+        if margin_pct >= 100.0:
+            raise ValidationError(
+                "Required Margin cannot be 100% or more — "
+                "the selling price would be infinite."
+            )
+        if margin_pct < 0.0:
+            raise ValidationError("Required Margin cannot be negative.")
+        if margin_pct == 0.0:
+            return cost
+        return cost / (1.0 - margin_pct / 100.0)
 
-    # @staticmethod
-    # def _calc_margin_pct(selling_price, cost):
-    #     """Margin % = (SP − Cost) / SP × 100  — reverse gross margin."""
-    #     if selling_price <= 0:
-    #         return 0.0
-    #     return ((selling_price - cost) / selling_price) * 100.0
+    @staticmethod
+    def _calc_margin_pct(selling_price, cost):
+        if selling_price <= 0 or cost <= 0:  # ← guard zero cost
+            return 0.0
+        return ((selling_price - cost) / selling_price) * 100.0
 
-    # # =========================================================================
-    # # UI ONCHANGES  (bidirectional)
-    # # =========================================================================
+    # ── UI Onchanges (bidirectional) ──────────────────────────────────────────
 
-    # @api.onchange('required_margin', 'price_unit')
-    # def _onchange_required_margin(self):
-    #     """
-    #     User enters Required Margin (%) or changes Vendor Cost
-    #     → auto-compute Selling Price (customer_price).
+    @api.onchange('product_id')
+    def _onchange_product_id_margin(self):
+        for line in self:
+            if not line.product_id:
+                continue
+            threshold = self.env['margin.threshold.config'].search([
+                ('category_id', '=', line.product_id.categ_id.id),
+                ('company_id', '=', line.order_id.company_id.id),  # ← must be order's company, no fallback
+                ('type', '=', 'vendor'),
+            ], order='id desc', limit=1)
+            if threshold:
+                line.required_margin = threshold.minimum_margin
+                cost = line.price_unit or 0.0
+                if cost and threshold.minimum_margin:
+                    try:
+                        line.customer_price = self._calc_selling_price(
+                            cost, threshold.minimum_margin
+                        )
+                    except ValidationError:
+                        pass
 
-    #     Selling Price = Vendor Cost / (1 − Margin%)
-    #     """
-    #     for line in self:
-    #         cost = line.price_unit or 0.0
-    #         margin = line.required_margin or 0.0
-    #         if not cost:
-    #             continue
-    #         line.customer_price = self._calc_selling_price(cost, margin)
+    @api.onchange('required_margin')  # ← price_unit removed
+    def _onchange_required_margin(self):
+        for line in self:
+            cost = line.price_unit or 0.0
+            margin = line.required_margin or 0.0
+            if not cost:
+                continue
+            line.customer_price = self._calc_selling_price(cost, margin)
 
-    # @api.onchange('customer_price')
-    # def _onchange_customer_price(self):
-    #     """
-    #     User enters Selling Price (customer_price) directly
-    #     → back-fill Required Margin %.
+    @api.onchange('customer_price')
+    def _onchange_customer_price(self):
+        for line in self:
+            sp = line.customer_price or 0.0
+            cost = line.price_unit or 0.0
+            line.required_margin = self._calc_margin_pct(sp, cost)
 
-    #     Margin % = (SP − Cost) / SP × 100
-    #     """
-    #     for line in self:
-    #         sp = line.customer_price or 0.0
-    #         cost = line.price_unit or 0.0
-    #         line.required_margin = self._calc_margin_pct(sp, cost)
+    # ── Programmatic hooks (create / write) ───────────────────────────────────
 
-    # # =========================================================================
-    # # PROGRAMMATIC HOOKS  (create / write)
-    # # Onchanges only fire in the UI; these ensure correctness when records are
-    # # created/updated by server-side code (e.g. BOQ → Create RFQ).
-    # # =========================================================================
+    def _get_threshold_margin(self, categ_id, company_id):
+        if not categ_id:
+            return 0.0
+        # Always use the order's company, never fall back to env.company
+        # to avoid cross-company threshold matches
+        threshold = self.env['margin.threshold.config'].search([
+            ('category_id', '=', categ_id),
+            ('company_id', '=', company_id),  # ← remove the `or self.env.company.id` fallback
+            ('type', '=', 'vendor'),
+        ], order='id desc', limit=1)
+        return threshold.minimum_margin if threshold else 0.0
 
-    # @api.model_create_multi
-    # def create(self, vals_list):
-    #     for vals in vals_list:
-    #         cp = vals.get('customer_price') or 0.0
-    #         pu = vals.get('price_unit') or 0.0
-    #         # Back-fill required_margin if customer_price is set (e.g. BOQ→RFQ)
-    #         if cp and 'required_margin' not in vals:
-    #             vals['required_margin'] = self._calc_margin_pct(cp, pu)
-    #         # Forward-fill customer_price if required_margin is set
-    #         elif vals.get('required_margin') and pu and not cp:
-    #             try:
-    #                 vals['customer_price'] = self._calc_selling_price(
-    #                     pu, vals['required_margin']
-    #                 )
-    #             except ValidationError:
-    #                 pass
-    #     return super().create(vals_list)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            cp = vals.get('customer_price') or 0.0
+            pu = vals.get('price_unit') or 0.0
 
-    # def write(self, vals):
-    #     res = super().write(vals)
-    #     # customer_price cannot be in @api.depends (see module-load note above).
-    #     # Manually trigger the stored compute when relevant fields change.
-    #     if 'customer_price' in vals or 'price_unit' in vals:
-    #         # Also sync required_margin when customer_price is written directly
-    #         if 'customer_price' in vals and 'required_margin' not in vals:
-    #             cp = vals.get('customer_price') or 0.0
-    #             for line in self:
-    #                 pu = line.price_unit or 0.0
-    #                 line.required_margin = self._calc_margin_pct(cp, pu)
-    #         self._compute_margin_percentage()
-    #     return res
+            # If customer_price already set from BOQ — don't overwrite it
+            if cp:
+                # Just back-fill required_margin from the given prices
+                if 'required_margin' not in vals:
+                    vals['required_margin'] = self._calc_margin_pct(cp, pu)
+                continue  # ← skip all formula computation
 
-    # # =========================================================================
-    # # STORED COMPUTE  — margin_percentage & is_margin_below_threshold
-    # # =========================================================================
+            # Only compute customer_price if not already provided
+            if 'required_margin' not in vals or not vals.get('required_margin'):
+                product_id = vals.get('product_id')
+                if product_id:
+                    product = self.env['product.product'].browse(product_id)
+                    order_id = vals.get('order_id')
+                    company_id = False
+                    if order_id:
+                        order = self.env['purchase.order'].browse(order_id)
+                        company_id = order.company_id.id
+                    threshold_margin = self._get_threshold_margin(
+                        product.categ_id.id, company_id
+                    )
+                    if threshold_margin:
+                        vals['required_margin'] = threshold_margin
+                        if pu and not cp:
+                            try:
+                                vals['customer_price'] = self._calc_selling_price(
+                                    pu, threshold_margin
+                                )
+                            except ValidationError:
+                                pass
 
-    # @api.depends(
-    #     'price_unit',
-    #     'required_margin',
-    #     'product_id.categ_id',
-    #     'display_type',
-    #     'is_downpayment',
-    # )
+            if pu and not cp and vals.get('required_margin'):
+                try:
+                    vals['customer_price'] = self._calc_selling_price(
+                        pu, vals['required_margin']
+                    )
+                except ValidationError:
+                    pass
+
+        return super().create(vals_list)
+
+    def write(self, vals):
+        # Guard against recursion — if we're already inside write, skip recompute
+        if self.env.context.get('_computing_margin'):
+            return super().write(vals)
+
+        res = super().write(vals)
+
+        if 'customer_price' in vals or 'price_unit' in vals:
+            if 'customer_price' in vals and 'required_margin' not in vals:
+                cp = vals.get('customer_price') or 0.0
+                for line in self:
+                    pu = line.price_unit or 0.0
+                    if not pu:
+                        continue
+                    line.required_margin = self._calc_margin_pct(cp, pu)
+
+            self.with_context(_computing_margin=True)._compute_margin_percentage()
+
+        return res
+
+    # ── Stored compute ────────────────────────────────────────────────────────
+
+    @api.depends(
+        'price_unit',
+        'required_margin',
+        'product_id.categ_id',
+        'display_type',
+        'is_downpayment',
+    )
     def _compute_margin_percentage(self):
         ThresholdConfig = self.env['margin.threshold.config']
         for line in self:
-            # Skip section/note lines and down-payment lines
             if line.display_type or line.is_downpayment:
-                line.margin_percentage = 0.0
-                line.is_margin_below_threshold = False
+                line.update({
+                    'margin_percentage': 0.0,
+                    'savings_percentage': 0.0,
+                    'is_margin_below_threshold': False,
+                })
                 continue
 
-            product_cost = line.customer_price or 0.0
-            vendor_price = line.price_unit
-            if product_cost:
-                line.margin_percentage = ((product_cost - vendor_price) / product_cost) * 100
-            else:
-                line.margin_percentage = 0.0
+            selling_price = getattr(line, 'customer_price', 0.0) or 0.0
+            vendor_cost = line.price_unit or 0.0
 
-            # Check against trade-wise threshold
+            computed_margin = self._calc_margin_pct(selling_price, vendor_cost)
+
             threshold = ThresholdConfig.search([
                 ('category_id', '=', line.product_id.categ_id.id),
                 ('company_id', '=', line.order_id.company_id.id),
-            ], limit=1)
+                ('type', '=', 'vendor'),
+            ], order='id desc', limit=1)
 
-            if threshold and line.margin_percentage < threshold.minimum_margin:
-                line.is_margin_below_threshold = True
-            else:
-                line.is_margin_below_threshold = False
+            line.update({
+                'margin_percentage': computed_margin,
+                'savings_percentage': computed_margin,
+                'is_margin_below_threshold': bool(
+                    threshold and computed_margin < threshold.minimum_margin
+                ),
+            })
