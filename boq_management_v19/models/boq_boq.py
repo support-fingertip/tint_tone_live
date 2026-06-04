@@ -4,6 +4,8 @@ from datetime import timedelta
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 from odoo.tools import format_date
+from odoo.exceptions import ValidationError
+
 
 _CATEGORY_CODES = ['electrical', 'civil', 'lighting', 'plumbing', 'hvac', 'finishing']
 
