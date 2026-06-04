@@ -104,7 +104,7 @@
                     </div>
 
                     <div class="boq_hero_body flex-fill">
-                        <h3 class="boq_hero_title">Head of Supply Chain</h3>
+                        <h3 class="boq_hero_title">Head of Supply Dashboard</h3>
                         <p class="boq_hero_sub mb-0">
                             Enterprise-wide consolidated procurement view across all companies
                         </p>
@@ -385,27 +385,25 @@
                     </div>
                 </div>
 
-                <t t-if="approvalTotals.count > 0">
-                    <div class="boq_stat_card flex-fill boq_stat_card_approval"
-                         t-on-click="openApprovalPos" style="cursor:pointer;">
-                        <div class="boq_stat_icon bg-secondary-subtle text-secondary">
-                            <i t-attf-class="fa #{ iconApprovalCard } fa-2x"/>
+                <div class="boq_stat_card flex-fill boq_stat_card_approval"
+                     t-on-click="openApprovalPos" style="cursor:pointer;">
+                    <div class="boq_stat_icon bg-secondary-subtle text-secondary">
+                        <i t-attf-class="fa #{ iconApprovalCard } fa-2x"/>
+                    </div>
+                    <div class="boq_stat_body">
+                        <div class="boq_stat_value">
+                            <t t-esc="approvalTotals.count"/>
                         </div>
-                        <div class="boq_stat_body">
-                            <div class="boq_stat_value">
-                                <t t-esc="approvalTotals.count"/>
-                            </div>
-                            <div class="boq_stat_label">
-                                Awaiting Approval
-                                <t t-if="approvalTotals.current > 0">
-                                    <span class="badge boq_badge_neutral rounded-pill ms-1 small">
-                                        <t t-esc="approvalTotals.current"/> needs your action
-                                    </span>
-                                </t>
-                            </div>
+                        <div class="boq_stat_label">
+                            Awaiting Approval
+                            <t t-if="approvalTotals.current > 0">
+                                <span class="badge boq_badge_neutral rounded-pill ms-1 small">
+                                    <t t-esc="approvalTotals.current"/> needs your action
+                                </span>
+                            </t>
                         </div>
                     </div>
-                </t>
+                </div>
 
             </div><!-- /stat cards -->
 <t t-if="isHeadDashboard and state.companySummary.length > 0">
@@ -492,204 +490,6 @@
 
                 </div>
             </t><!-- /company overview -->
-<t t-if="state.vendorSummary.length > 0">
-                <div class="px-4 pb-2">
-
-                    <div class="boq_section_header d-flex align-items-center
-                                justify-content-between mb-3">
-                        <h5 class="mb-0 fw-bold boq_section_title">
-                            <i t-attf-class="fa #{ dashboardIcon } me-2 text-primary"/>
-                            <t t-esc="partnerLabel"/> Summary
-                            <span class="badge boq_badge_neutral rounded-pill ms-2 small">
-                                <t t-esc="state.vendorSummary.length"/>
-                            </span>
-                        </h5>
-                    </div>
-
-                    <div class="boq_vendor_cards_scroll">
-                        <div class="boq_vendor_cards_row">
-
-                            <t t-foreach="state.vendorSummary" t-as="vs" t-key="vs.vendor_id">
-                                <div class="boq_vendor_card"
-                                     t-on-click="() => this.openVendorRfqs(vs.vendor_id, vs.vendor_name)"
-                                     style="cursor:pointer;">
-
-                                    <div class="boq_vc_header d-flex align-items-center gap-2 mb-3">
-                                        <div class="boq_vendor_avatar">
-                                            <t t-esc="(vs.vendor_name || '?').charAt(0).toUpperCase()"/>
-                                        </div>
-                                        <div class="min-w-0">
-                                            <div class="fw-semibold text-truncate boq_vc_name"
-                                                 t-esc="vs.vendor_name"/>
-                                            <div t-if="vs.vendor_email"
-                                                 class="text-muted small text-truncate"
-                                                 t-esc="vs.vendor_email"/>
-                                        </div>
-                                    </div>
-
-                                    <div class="boq_vc_metrics d-flex flex-wrap gap-2 mb-3">
-
-                                        <div class="boq_vc_metric">
-                                            <div class="boq_vc_metric_value boq_metric_neutral">
-                                                <t t-esc="vs.rfq_count"/>
-                                            </div>
-                                            <div class="boq_vc_metric_label">RFQs</div>
-                                        </div>
-
-                                        <div class="boq_vc_metric">
-                                            <div class="boq_vc_metric_value small boq_metric_neutral">
-                                                <t t-esc="fmtCurrency(vs.total_value)"/>
-                                            </div>
-                                            <div class="boq_vc_metric_label">Total Value</div>
-                                        </div>
-
-                                        <t t-if="isVendorDashboard">
-                                        <div class="boq_vc_metric">
-                                            <t t-if="vs.has_vendor_price">
-                                                <div t-attf-class="boq_vc_metric_value {{ marginClass(vs.margin_percent) }}"
-                                                     style="border-radius:6px;padding:2px 6px;">
-                                                    <t t-esc="vs.margin_percent.toFixed(1)"/>%
-                                                </div>
-                                            </t>
-                                            <t t-else="">
-                                                <div class="boq_vc_metric_value text-muted" style="font-size:0.85rem;">—</div>
-                                            </t>
-                                            <div class="boq_vc_metric_label">Margin</div>
-                                        </div>
-                                        </t>
-
-                                    </div>
-
-                                    <div class="boq_vc_footer d-flex align-items-center
-                                                justify-content-between flex-wrap gap-1">
-
-                                        <span t-if="vs.rfq_states and vs.rfq_states !== '—'"
-                                              class="badge boq_badge_neutral rounded-pill small">
-                                            <t t-esc="vs.rfq_states"/>
-                                        </span>
-
-                                        <span class="boq_vc_open ms-auto"
-                                              t-on-click.stop="() => this.openVendorContact(vs.vendor_id)"
-                                              title="Open contact">
-                                            <i class="fa fa-user text-muted"/>
-                                        </span>
-
-                                    </div>
-
-                                    <t t-if="vs.project_names and vs.project_names !== '—'">
-                                        <div class="boq_vc_projects text-muted small mt-2 text-truncate">
-                                            <i class="fa fa-briefcase me-1"/>
-                                            <t t-esc="vs.project_names"/>
-                                        </div>
-                                    </t>
-
-                                </div>
-                            </t>
-
-                        </div>
-                    </div>
-
-                </div>
-            </t>
-
-            <t t-if="state.pendingVendors.length > 0">
-                <div class="px-4 pb-3">
-
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <h5 class="mb-0 fw-bold boq_section_title">
-                            <i t-attf-class="fa #{ iconPendingSection } me-2 text-warning"/>
-                            Awaiting Quotation
-                            <span class="badge boq_badge_neutral rounded-pill ms-2 small">
-                                <t t-esc="pendingRfqTotals.rfqs"/> RFQ<t t-if="pendingRfqTotals.rfqs !== 1">s</t>
-                            </span>
-                            <span class="badge boq_badge_neutral rounded-pill ms-1 small">
-                                <t t-esc="pendingRfqTotals.vendors"/>
-                                <t t-esc="partnerLabel"/><t t-if="pendingRfqTotals.vendors !== 1">s</t>
-                            </span>
-                        </h5>
-                        <small class="text-muted">
-                            <i class="fa fa-info-circle me-1"/>
-                            Oldest: <strong><t t-esc="pendingRfqTotals.oldest"/>d</strong> ago
-                        </small>
-                    </div>
-
-                    <div class="boq_pending_table">
-
-                        <div class="boq_pending_thead">
-                            <span class="boq_pending_col_vendor">
-                                <t t-esc="partnerLabel"/>
-                            </span>
-                            <span class="boq_pending_col_rfq">RFQ Reference</span>
-                            <span class="boq_pending_col_trade">Trade</span>
-                            <span class="boq_pending_col_date">Issued On</span>
-                            <span class="boq_pending_col_days">Days Pending</span>
-                            <span class="boq_pending_col_status">Status</span>
-                            <span class="boq_pending_col_value">Value</span>
-                        </div>
-
-                        <t t-foreach="state.pendingVendors" t-as="pv" t-key="pv.vendor_id">
-                            <t t-foreach="pv.rfqs" t-as="prfq" t-key="prfq.rfq_id">
-                                <div class="boq_pending_row"
-                                     t-on-click="() => this.openRfq(prfq.rfq_id)"
-                                     style="cursor:pointer;">
-
-                                    <span class="boq_pending_col_vendor">
-                                        <t t-if="prfq_index === 0">
-                                            <span class="boq_vendor_avatar_sm flex-shrink-0">
-                                                <t t-esc="(pv.vendor_name || '?').charAt(0).toUpperCase()"/>
-                                            </span>
-                                            <span class="fw-semibold ms-2 text-truncate">
-                                                <t t-esc="pv.vendor_name"/>
-                                            </span>
-                                            <t t-if="pv.rfq_count > 1">
-                                                <span class="badge boq_badge_neutral rounded-pill ms-1 small">
-                                                    <t t-esc="pv.rfq_count"/>
-                                                </span>
-                                            </t>
-                                        </t>
-                                    </span>
-
-                                    <span class="boq_pending_col_rfq">
-                                        <i class="fa fa-file-text-o me-1 text-muted"/>
-                                        <span class="fw-semibold text-primary">
-                                            <t t-esc="prfq.rfq_name"/>
-                                        </span>
-                                    </span>
-
-                                    <span class="boq_pending_col_trade text-muted small">
-                                        <t t-esc="prfq.trade_name"/>
-                                    </span>
-
-                                    <span class="boq_pending_col_date text-muted small">
-                                        <t t-esc="prfq.date_order"/>
-                                    </span>
-
-                                    <span class="boq_pending_col_days">
-                                        <span class="badge boq_badge_neutral rounded-pill">
-                                            <i class="fa fa-clock-o me-1"/>
-                                            <t t-esc="prfq.days_pending"/>d
-                                        </span>
-                                    </span>
-                                    <span class="boq_pending_col_status">
-                                        <span class="badge boq_badge_neutral rounded-pill">
-                                            <t t-esc="prfq.state_label"/>
-                                        </span>
-                                    </span>
-                                    <span class="boq_pending_col_value fw-semibold">
-                                        <t t-esc="fmtCurrency(prfq.amount_total)"/>
-                                        <span class="boq_pending_open_icon ms-1">
-                                            <i class="fa fa-external-link text-muted"/>
-                                        </span>
-                                    </span>
-
-                                </div>
-                            </t>
-                        </t>
-
-                    </div>
-                </div>
-            </t>
-
             <div class="boq_tree_summary_bar d-flex flex-wrap gap-2 px-4 pb-3">
                 <span class="boq_totals_chip">
                     <i class="fa fa-wrench me-1"/>
@@ -822,7 +622,8 @@
                             justify-content-between mb-3">
                     <h5 class="mb-0 fw-bold boq_section_title">
                         <i t-attf-class="fa #{ iconTradeAnalysis } me-2 text-primary"/>
-                        Trade View Analysis
+                        <t t-if="isHeadDashboard">Category Wise Analysis</t>
+                        <t t-else="">Trade Wise Analysis</t>
                         <span class="badge boq_badge_neutral rounded-pill ms-2 small">
                             <t t-esc="treeTotals.trades"/>
                             Trade<t t-if="treeTotals.trades !== 1">s</t>
@@ -1229,8 +1030,223 @@
                 </t>
 
             </div>
+                <div class="px-4 pb-2">
 
-            <t t-if="state.approvalPOs.length > 0">
+                    <div class="boq_section_header d-flex align-items-center
+                                justify-content-between mb-3">
+                        <h5 class="mb-0 fw-bold boq_section_title">
+                            <i t-attf-class="fa #{ dashboardIcon } me-2 text-primary"/>
+                            <t t-esc="partnerLabel"/> Summary
+                            <span class="badge boq_badge_neutral rounded-pill ms-2 small">
+                                <t t-esc="state.vendorSummary.length"/>
+                            </span>
+                        </h5>
+                    </div>
+
+                    <div class="boq_vendor_cards_scroll">
+                        <div class="boq_vendor_cards_row">
+
+                            <t t-foreach="state.vendorSummary" t-as="vs" t-key="vs.vendor_id">
+                                <div class="boq_vendor_card"
+                                     t-on-click="() => this.openVendorRfqs(vs.vendor_id, vs.vendor_name)"
+                                     style="cursor:pointer;">
+
+                                    <div class="boq_vc_header d-flex align-items-center gap-2 mb-3">
+                                        <div class="boq_vendor_avatar">
+                                            <t t-esc="(vs.vendor_name || '?').charAt(0).toUpperCase()"/>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="fw-semibold text-truncate boq_vc_name"
+                                                 t-esc="vs.vendor_name"/>
+                                            <div t-if="vs.vendor_email"
+                                                 class="text-muted small text-truncate"
+                                                 t-esc="vs.vendor_email"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="boq_vc_metrics d-flex flex-wrap gap-2 mb-3">
+
+                                        <div class="boq_vc_metric">
+                                            <div class="boq_vc_metric_value boq_metric_neutral">
+                                                <t t-esc="vs.rfq_count"/>
+                                            </div>
+                                            <div class="boq_vc_metric_label">RFQs</div>
+                                        </div>
+
+                                        <div class="boq_vc_metric">
+                                            <div class="boq_vc_metric_value small boq_metric_neutral">
+                                                <t t-esc="fmtCurrency(vs.total_value)"/>
+                                            </div>
+                                            <div class="boq_vc_metric_label">Total Value</div>
+                                        </div>
+
+                                        <t t-if="isVendorDashboard">
+                                        <div class="boq_vc_metric">
+                                            <t t-if="vs.has_vendor_price">
+                                                <div t-attf-class="boq_vc_metric_value {{ marginClass(vs.margin_percent) }}"
+                                                     style="border-radius:6px;padding:2px 6px;">
+                                                    <t t-esc="vs.margin_percent.toFixed(1)"/>%
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <div class="boq_vc_metric_value text-muted" style="font-size:0.85rem;">—</div>
+                                            </t>
+                                            <div class="boq_vc_metric_label">Margin</div>
+                                        </div>
+                                        </t>
+
+                                    </div>
+
+                                    <div class="boq_vc_footer d-flex align-items-center
+                                                justify-content-between flex-wrap gap-1">
+
+                                        <t t-if="vs.rfq_state_summary and vs.rfq_state_summary.length > 0">
+                                            <t t-foreach="vs.rfq_state_summary" t-as="ss" t-key="ss.state">
+                                                <span t-attf-class="badge rounded-pill small {{ rfqStateClass(ss.state) }}">
+                                                    <t t-esc="ss.count"/> <t t-esc="ss.state_label"/>
+                                                </span>
+                                            </t>
+                                        </t>
+                                        <t t-elif="vs.rfq_count === 0">
+                                            <span class="badge boq_badge_neutral rounded-pill small">
+                                                No RFQs
+                                            </span>
+                                        </t>
+
+                                        <span class="boq_vc_open ms-auto"
+                                              t-on-click.stop="() => this.openVendorContact(vs.vendor_id)"
+                                              title="Open contact">
+                                            <i class="fa fa-user text-muted"/>
+                                        </span>
+
+                                    </div>
+
+                                    <t t-if="vs.project_names and vs.project_names !== '—'">
+                                        <div class="boq_vc_projects text-muted small mt-2 text-truncate">
+                                            <i class="fa fa-briefcase me-1"/>
+                                            <t t-esc="vs.project_names"/>
+                                        </div>
+                                    </t>
+
+                                </div>
+                            </t>
+
+                        </div>
+                    </div>
+
+                    <t t-if="state.vendorSummary.length === 0">
+                        <div class="text-center py-4 text-muted">
+                            <i class="fa fa-users fa-2x mb-2 d-block opacity-50"/>
+                            <p class="small mb-0">No <t t-esc="partnerLabel"/>s found.</p>
+                        </div>
+                    </t>
+
+                </div>
+
+                <div class="px-4 pb-3">
+
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="mb-0 fw-bold boq_section_title">
+                            <i t-attf-class="fa #{ iconPendingSection } me-2 text-warning"/>
+                            Awaiting Quotation
+                            <span class="badge boq_badge_neutral rounded-pill ms-2 small">
+                                <t t-esc="pendingRfqTotals.rfqs"/> RFQ<t t-if="pendingRfqTotals.rfqs !== 1">s</t>
+                            </span>
+                            <span class="badge boq_badge_neutral rounded-pill ms-1 small">
+                                <t t-esc="pendingRfqTotals.vendors"/>
+                                <t t-esc="partnerLabel"/><t t-if="pendingRfqTotals.vendors !== 1">s</t>
+                            </span>
+                        </h5>
+                        <small class="text-muted">
+                            <i class="fa fa-info-circle me-1"/>
+                            Oldest: <strong><t t-esc="pendingRfqTotals.oldest"/>d</strong> ago
+                        </small>
+                    </div>
+
+                    <div class="boq_pending_table">
+
+                        <div class="boq_pending_thead">
+                            <span class="boq_pending_col_vendor">
+                                <t t-esc="partnerLabel"/>
+                            </span>
+                            <span class="boq_pending_col_rfq">RFQ Reference</span>
+                            <span class="boq_pending_col_trade">Trade</span>
+                            <span class="boq_pending_col_date">Issued On</span>
+                            <span class="boq_pending_col_days">Days Pending</span>
+                            <span class="boq_pending_col_status">Status</span>
+                            <span class="boq_pending_col_value">Value</span>
+                        </div>
+
+                        <t t-foreach="state.pendingVendors" t-as="pv" t-key="pv.vendor_id">
+                            <t t-foreach="pv.rfqs" t-as="prfq" t-key="prfq.rfq_id">
+                                <div class="boq_pending_row"
+                                     t-on-click="() => this.openRfq(prfq.rfq_id)"
+                                     style="cursor:pointer;">
+
+                                    <span class="boq_pending_col_vendor">
+                                        <t t-if="prfq_index === 0">
+                                            <span class="boq_vendor_avatar_sm flex-shrink-0">
+                                                <t t-esc="(pv.vendor_name || '?').charAt(0).toUpperCase()"/>
+                                            </span>
+                                            <span class="fw-semibold ms-2 text-truncate">
+                                                <t t-esc="pv.vendor_name"/>
+                                            </span>
+                                            <t t-if="pv.rfq_count > 1">
+                                                <span class="badge boq_badge_neutral rounded-pill ms-1 small">
+                                                    <t t-esc="pv.rfq_count"/>
+                                                </span>
+                                            </t>
+                                        </t>
+                                    </span>
+
+                                    <span class="boq_pending_col_rfq">
+                                        <i class="fa fa-file-text-o me-1 text-muted"/>
+                                        <span class="fw-semibold text-primary">
+                                            <t t-esc="prfq.rfq_name"/>
+                                        </span>
+                                    </span>
+
+                                    <span class="boq_pending_col_trade text-muted small">
+                                        <t t-esc="prfq.trade_name"/>
+                                    </span>
+
+                                    <span class="boq_pending_col_date text-muted small">
+                                        <t t-esc="prfq.date_order"/>
+                                    </span>
+
+                                    <span class="boq_pending_col_days">
+                                        <span class="badge boq_badge_neutral rounded-pill">
+                                            <i class="fa fa-clock-o me-1"/>
+                                            <t t-esc="prfq.days_pending"/>d
+                                        </span>
+                                    </span>
+                                    <span class="boq_pending_col_status">
+                                        <span class="badge boq_badge_neutral rounded-pill">
+                                            <t t-esc="prfq.state_label"/>
+                                        </span>
+                                    </span>
+                                    <span class="boq_pending_col_value fw-semibold">
+                                        <t t-esc="fmtCurrency(prfq.amount_total)"/>
+                                        <span class="boq_pending_open_icon ms-1">
+                                            <i class="fa fa-external-link text-muted"/>
+                                        </span>
+                                    </span>
+
+                                </div>
+                            </t>
+                        </t>
+
+                    </div>
+
+                    <t t-if="state.pendingVendors.length === 0">
+                        <div class="text-center py-4 text-muted">
+                            <i class="fa fa-check-circle fa-2x mb-2 d-block text-success opacity-50"/>
+                            <p class="small mb-0">All quotations received — no pending items.</p>
+                        </div>
+                    </t>
+                </div>
+
+
                 <div class="px-4 pb-4">
 
                     <div class="boq_approval_section_header d-flex align-items-center
@@ -1339,8 +1355,14 @@
                         </t>
 
                     </div>
+
+                    <t t-if="state.approvalPOs.length === 0">
+                        <div class="text-center py-4 text-muted">
+                            <i class="fa fa-check-circle fa-2x mb-2 d-block text-success opacity-50"/>
+                            <p class="small mb-0">No pending approvals.</p>
+                        </div>
+                    </t>
                 </div>
-            </t>
 
         </div>
     </t>
