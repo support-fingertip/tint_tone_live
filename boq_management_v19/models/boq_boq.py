@@ -145,6 +145,12 @@ class BoqBoq(models.Model):
     hvac_category_id       = fields.Many2one('boq.category', compute='_compute_category_refs')
     finishing_category_id  = fields.Many2one('boq.category', compute='_compute_category_refs')
 
+    @api.constrains('date')
+    def _check_date_not_past(self):
+        for rec in self:
+            if rec.date and rec.date < fields.Date.context_today(rec):
+                raise ValidationError("BOQ Date cannot be earlier than today.")
+
     @api.depends('project_name')
     def _compute_project_id(self):
         Project = self.env['project.project']
