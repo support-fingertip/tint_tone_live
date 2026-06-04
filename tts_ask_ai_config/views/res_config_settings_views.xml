@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.tts.ask.ai</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='integration']" position="inside">
+                <setting id="tts_ask_ai_systray" string="Disable Ask AI Systray" help="Hide the Ask AI icon from the top navigation bar" groups="base.group_system">
+                    <field name="disable_ask_ai_systray" />
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>
