@@ -437,7 +437,7 @@ export class HeadSupplierDashboard extends BoqManagerDashboardBase {
     static template       = "boq_management_v19.HeadSupplierDashboard";
 
     get isHeadDashboard()   { return true; }
-    get dashboardTitle()    { return "Head of Supply Chain"; }
+    get dashboardTitle()    { return "Head of Supply Dashboard"; }
     get dashboardSubtitle() { return "Consolidated multi-company supplier & procurement view"; }
     get dashboardIcon()     { return "fa-globe"; }
     get partnerLabel()      { return "Partner"; }
@@ -488,30 +488,30 @@ export class HeadSupplierDashboard extends BoqManagerDashboardBase {
 
     async removeCompany(ev, cid) {
         if (ev) ev.stopPropagation();
-        const all = this.state.availableCompanies.map(c => c.id);
-        const cur = this.state.selectedCompanyIds;
-        if (cur.length === 0) {
-            this.state.selectedCompanyIds = all.filter(id => id !== cid);
-        } else {
-            const next = cur.filter(id => id !== cid);
-            this.state.selectedCompanyIds = next.length > 0 ? next : [];
-        }
+        const next = this.state.selectedCompanyIds.filter(id => id !== cid);
+        this.state.selectedCompanyIds = next; // empty = all
         await this._reloadFiltered();
     }
 
     async toggleCompany(cid) {
-        const all   = this.state.availableCompanies.map(c => c.id);
-        const cur   = this.state.selectedCompanyIds;
+        const all = this.state.availableCompanies.map(c => c.id);
+        const cur = this.state.selectedCompanyIds;
 
+        let next;
         if (cur.length === 0) {
-            this.state.selectedCompanyIds = all.filter(id => id !== cid);
+            // Currently showing all — selecting one company means "show only this one"
+            next = [cid];
         } else if (cur.includes(cid)) {
-            const next = cur.filter(id => id !== cid);
-            this.state.selectedCompanyIds = next.length > 0 ? next : [];
+            // Deselect: remove from the selection
+            next = cur.filter(id => id !== cid);
+            // Empty selection means "all" again
         } else {
-            const next = [...cur, cid];
-            this.state.selectedCompanyIds = next.length === all.length ? [] : next;
+            // Add this company to the selection
+            next = [...cur, cid];
+            // If every company is now selected, treat as "all" (empty)
+            if (next.length === all.length) next = [];
         }
+        this.state.selectedCompanyIds = next;
         await this._reloadFiltered();
     }
 
