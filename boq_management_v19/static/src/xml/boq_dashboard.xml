@@ -507,11 +507,10 @@
                     <i class="fa fa-shopping-cart me-1"/>
                     <strong><t t-esc="treeTotals.rfqs"/></strong> RFQs
                 </span>
-                <t t-foreach="treeTotals.stateBreakdown" t-as="sb" t-key="sb.state">
-                    <span t-attf-class="boq_totals_chip badge #{ rfqStateClass(sb.state) }">
-                        <strong><t t-esc="sb.count"/></strong>&#160;<t t-esc="sb.label"/>
-                    </span>
-                </t>
+                <span t-if="treeTotals.pending > 0" class="boq_totals_chip">
+                    <i class="fa fa-clock-o me-1"/>
+                    <strong><t t-esc="treeTotals.pending"/></strong> Pending
+                </span>
                 <t t-if="treeTotals.submitted > 0">
                     <button t-attf-class="boq_chip_notification boq_chip_notif_btn
                                          #{ state.showRecentPanel ? 'boq_chip_notif_active' : '' }"
