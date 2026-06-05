@@ -286,30 +286,30 @@
                                     <span t-esc="'{:,.2f}'.format(o.amount_untaxed)"/>
                                 </td>
                             </tr>
-                            <tr>
-                                <td class="totals-lbl">Freight Charge</td>
-                                <td class="totals-val">Rs.
-                                    <span t-esc="'{:,.2f}'.format(o.freight_charge or 0.0)"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="totals-lbl">CGST</td>
-                                <td class="totals-val">Rs.
-                                    <span t-esc="'{:,.2f}'.format(o.amount_cgst or 0.0)"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="totals-lbl">SGST</td>
-                                <td class="totals-val">Rs.
-                                    <span t-esc="'{:,.2f}'.format(o.amount_sgst or 0.0)"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="totals-lbl">Packing Tax</td>
-                                <td class="totals-val">Rs.
-                                    <span t-esc="'{:,.2f}'.format(o.packing_tax or 0.0)"/>
-                                </td>
-                            </tr>
+<!--                            <tr>-->
+<!--                                <td class="totals-lbl">Freight Charge</td>-->
+<!--                                <td class="totals-val">Rs.-->
+<!--                                    <span t-esc="'{:,.2f}'.format(o.freight_charge or 0.0)"/>-->
+<!--                                </td>-->
+<!--                            </tr>-->
+<!--                            <tr>-->
+<!--                                <td class="totals-lbl">CGST</td>-->
+<!--                                <td class="totals-val">Rs.-->
+<!--                                    <span t-esc="'{:,.2f}'.format(o.amount_cgst or 0.0)"/>-->
+<!--                                </td>-->
+<!--                            </tr>-->
+<!--                            <tr>-->
+<!--                                <td class="totals-lbl">SGST</td>-->
+<!--                                <td class="totals-val">Rs.-->
+<!--                                    <span t-esc="'{:,.2f}'.format(o.amount_sgst or 0.0)"/>-->
+<!--                                </td>-->
+<!--                            </tr>-->
+<!--                            <tr>-->
+<!--                                <td class="totals-lbl">Packing Tax</td>-->
+<!--                                <td class="totals-val">Rs.-->
+<!--                                    <span t-esc="'{:,.2f}'.format(o.packing_tax or 0.0)"/>-->
+<!--                                </td>-->
+<!--                            </tr>-->
                             <tr>
                                 <td class="totals-lbl totals-gross">Gross Amount</td>
                                 <td class="totals-val totals-gross">
