@@ -49,8 +49,17 @@ class PurchaseOrderLine(models.Model):
     @api.constrains('product_qty', 'price_unit')
     def _check_quantity_and_price(self):
         for line in self:
+            if (
+                    line.display_type
+                    or line.is_downpayment
+                    or 'Down Payment' in (line.name or '')
+                    or 'Running Payment' in (line.name or '')
+            ):
+                continue
+
+            if line.price_unit < 0:
+                raise ValidationError(_("Unit Price cannot be negative."))
+
             if line.product_qty <= 0:
                 raise ValidationError(_("Quantity must be greater than zero."))
-            if line.price_unit < 0:
-                raise ValidationError(_("Unit Price cannot be lower than zero."))
 
