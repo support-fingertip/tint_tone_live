@@ -1190,6 +1190,11 @@
                                     <span class="fw-semibold text-primary">
                                         <t t-esc="po.po_name"/>
                                     </span>
+                                    <t t-if="po.is_margin_approval">
+                                        <span class="badge bg-warning text-dark rounded-pill ms-1 small">
+                                            <i class="fa fa-percent me-1"/>Margin Approval
+                                        </span>
+                                    </t>
                                     <t t-if="po.date_order">
                                         <small class="text-muted d-block">
                                             <t t-esc="po.date_order"/>
