@@ -2006,11 +2006,18 @@ class BoqBoq(models.Model):
             [('company_id', 'in', company_ids)] + self._get_boq_type_domain(dashboard_type)
         )
         all_rfq_ids = self._get_dashboard_rfq_ids(dashboard_type, company_ids, boqs.ids)
+        has_margin_approval = 'margin_approval_status' in self.env['purchase.order']._fields
         if all_rfq_ids:
-            pending_pos = self.env['purchase.order'].browse(list(all_rfq_ids)).filtered(
+            all_pos = self.env['purchase.order'].browse(list(all_rfq_ids)).filtered(
                 lambda r: r.company_id.id in set(company_ids)
-                and r.state == 'to approve'
             )
+            if has_margin_approval:
+                pending_pos = all_pos.filtered(
+                    lambda r: r.state == 'to approve'
+                    or r.margin_approval_status == 'to_approve'
+                )
+            else:
+                pending_pos = all_pos.filtered(lambda r: r.state == 'to approve')
         else:
             pending_pos = self.env['purchase.order']
 
@@ -2039,6 +2046,11 @@ class BoqBoq(models.Model):
                     'is_mine':       is_current and current_user in al.user_ids,
                 })
 
+            is_margin = (
+                has_margin_approval
+                and po.margin_approval_status == 'to_approve'
+                and po.state != 'to approve'
+            )
             result.append({
                 'po_id':               po.id,
                 'po_name':             po.name,
@@ -2050,6 +2062,7 @@ class BoqBoq(models.Model):
                 'approval_lines':      approval_lines,
                 'has_current_approver': has_current_approver,
                 'approval_count':      len(approval_lines),
+                'is_margin_approval':  is_margin,
                 'approved_count':      len([a for a in approval_lines if a['status'] == 'approved']),
             })
 
