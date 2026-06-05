@@ -309,3 +309,12 @@ class PurchaseOrder(models.Model):
                 'default_purchase_id': self.id,
             }
         }
+
+    def write(self, vals):
+        if vals.get('date_planned'):
+            new_dt = fields.Datetime.to_datetime(vals['date_planned'])
+            new_date = fields.Datetime.context_timestamp(self, new_dt).date()
+            if new_date < fields.Date.context_today(self):
+                from odoo.exceptions import UserError
+                raise UserError(_("Expected Arrival cannot be a past date."))
+        return super().write(vals)
