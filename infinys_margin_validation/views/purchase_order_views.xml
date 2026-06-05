@@ -118,6 +118,20 @@
                      invisible="margin_approval_status != 'rejected'">
                     <strong>PO Approval: </strong> The PO has been rejected.
                 </div>
+
+                <!-- Pending -->
+                <div class="alert alert-info" role="alert"
+                     invisible="state != 'to approve'">
+                    <strong>Approval:</strong>
+                    Approval Pending.
+                </div>
+
+                <!-- Approved -->
+                <div class="alert alert-success" role="alert"
+                     invisible="state != 'purchase'">
+                    <strong>Approval:</strong>
+                    Approval Approved Successfully.
+                </div>
             </xpath>
 
 <!--            &lt;!&ndash; Request for Approval button &ndash;&gt;-->
