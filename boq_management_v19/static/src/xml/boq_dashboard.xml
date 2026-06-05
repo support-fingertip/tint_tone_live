@@ -278,20 +278,22 @@
                                     <div class="boq_cf_dd_divider"/>
 
                                     <t t-foreach="state.availableCompanies" t-as="ac" t-key="ac.id">
-                                        <div t-attf-class="boq_cf_dd_item
-                                                           #{ isCompanySelected(ac.id) ? 'boq_cf_dd_active' : '' }"
-                                             t-on-click="() => this.toggleCompany(ac.id)">
-                                            <i t-attf-class="fa me-2
-                                                              #{ isCompanySelected(ac.id)
-                                                                 ? 'fa-check-square-o text-success'
-                                                                 : 'fa-square-o text-muted' }"/>
-                                            <span class="boq_cf_dd_avatar me-2">
-                                                <t t-esc="ac.initial"/>
-                                            </span>
-                                            <span class="text-truncate flex-fill">
-                                                <t t-esc="ac.name"/>
-                                            </span>
-                                        </div>
+                                        <t t-if="!ac.is_parent">
+                                            <div t-attf-class="boq_cf_dd_item
+                                                               #{ isCompanySelected(ac.id) ? 'boq_cf_dd_active' : '' }"
+                                                 t-on-click="() => this.toggleCompany(ac.id)">
+                                                <i t-attf-class="fa me-2
+                                                                  #{ isCompanySelected(ac.id)
+                                                                     ? 'fa-check-square-o text-success'
+                                                                     : 'fa-square-o text-muted' }"/>
+                                                <span class="boq_cf_dd_avatar me-2">
+                                                    <t t-esc="ac.initial"/>
+                                                </span>
+                                                <span class="text-truncate flex-fill">
+                                                    <t t-esc="ac.name"/>
+                                                </span>
+                                            </div>
+                                        </t>
                                     </t>
 
                                 </div>

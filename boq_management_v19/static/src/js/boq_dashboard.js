@@ -561,8 +561,7 @@ export class HeadSupplierDashboard extends BoqManagerDashboardBase {
                 const companies = await this.orm.call(
                     "boq.boq", "get_available_companies", [], {}
                 ).catch(() => []);
-                // Exclude parent companies (those that have children in the list)
-                this.state.availableCompanies = companies.filter(c => !c.is_parent);
+                this.state.availableCompanies = companies;
             }
             await this._loadData();
         } catch (err) {
