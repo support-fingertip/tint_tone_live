@@ -1361,6 +1361,7 @@ class BoqBoq(models.Model):
                 'margin_percent':    0.0,
                 'vendor_count':      len(vendors_dict),
                 'vendors':        [],
+                '_state_counts':     {},
             }
 
             for vid, partner in vendors_dict.items():
@@ -1474,6 +1475,17 @@ class BoqBoq(models.Model):
                 trade_node['total_value']         += vendor_node['total_value']
                 trade_node['customer_total']      += vendor_node['customer_total']
                 trade_node['vendor_cost_total']   += vendor_node['vendor_cost_total']
+                for ss in vendor_node.get('state_summary', []):
+                    sc = trade_node['_state_counts']
+                    sc[ss['state']] = sc.get(ss['state'], 0) + ss['count']
+
+            # Build trade-level state_summary from accumulated counts
+            _state_order = ['draft', 'sent', 'submitted', 'to approve', 'purchase', 'done', 'cancel']
+            trade_node['state_summary'] = [
+                {'state': s, 'state_label': RFQ_STATE_LABELS.get(s, s), 'count': trade_node['_state_counts'][s]}
+                for s in _state_order if s in trade_node['_state_counts']
+            ]
+            del trade_node['_state_counts']
 
             # Compute trade-level margin from accumulated totals
             _tr_c = trade_node['customer_total']
@@ -1551,6 +1563,7 @@ class BoqBoq(models.Model):
                 'margin_percent':    0.0,
                 'vendor_count':      len(direct_partner_map),
                 'vendors':           [],
+                '_state_counts':     {},
             }
 
             for vid, pdata in direct_partner_map.items():
@@ -1627,6 +1640,16 @@ class BoqBoq(models.Model):
                 direct_trade_node['pending_count'] += vendor_node['pending_count']
                 direct_trade_node['submitted_count'] += vendor_node['recently_submitted_count']
                 direct_trade_node['total_value']  += vendor_node['total_value']
+                for ss in vendor_node.get('state_summary', []):
+                    sc = direct_trade_node['_state_counts']
+                    sc[ss['state']] = sc.get(ss['state'], 0) + ss['count']
+
+            _state_order = ['draft', 'sent', 'submitted', 'to approve', 'purchase', 'done', 'cancel']
+            direct_trade_node['state_summary'] = [
+                {'state': s, 'state_label': RFQ_STATE_LABELS.get(s, s), 'count': direct_trade_node['_state_counts'][s]}
+                for s in _state_order if s in direct_trade_node['_state_counts']
+            ]
+            del direct_trade_node['_state_counts']
 
             direct_trade_node['vendors'].sort(
                 key=lambda v: (-v['recently_submitted_count'], v['vendor_name'])
