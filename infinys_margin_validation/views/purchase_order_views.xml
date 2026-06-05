@@ -120,17 +120,17 @@
                 </div>
 
                 <!-- Pending -->
-                <div class="alert alert-info" role="alert"
+                 <div class="alert alert-info" role="alert"
                      invisible="state != 'to approve'">
                     <strong>Approval:</strong>
-                    Approval Pending.
+                    PO approval pending
                 </div>
 
                 <!-- Approved -->
                 <div class="alert alert-success" role="alert"
                      invisible="state != 'purchase'">
                     <strong>Approval:</strong>
-                    Approval Approved Successfully.
+                    PO approved successfully
                 </div>
             </xpath>
 
