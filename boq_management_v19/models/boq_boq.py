@@ -1330,7 +1330,14 @@ class BoqBoq(models.Model):
                     trade_vendor_rfq_ids.setdefault(key, set()).update(boq_rfq_ids_for_line)
 
         tree = []
-        for cat_id, cat_data in trade_data.items():
+        # Track which (vendor_id, rfq_id) pairs have already been assigned to a
+        # trade so that the same RFQ is never shown under two trades for the same
+        # vendor (happens when a vendor is assigned to multiple trades in one BOQ).
+        # Processing in alphabetical trade order gives deterministic results.
+        assigned_vendor_rfqs = set()  # {(vendor_id, rfq_id)}
+
+        for cat_id, cat_data in sorted(trade_data.items(),
+                                       key=lambda kv: kv[1]['category'].name or ''):
             category = cat_data['category']
             vendors_dict = cat_data['vendors']
 
@@ -1351,14 +1358,19 @@ class BoqBoq(models.Model):
             }
 
             for vid, partner in vendors_dict.items():
-                # Only show RFQs that are linked to BOQs in THIS trade for this
-                # vendor — avoids duplicating the same RFQ under every trade
-                # the vendor is assigned to.
+                # Restrict to RFQs that are linked to BOQs in THIS trade for
+                # this vendor AND haven't already been shown under an earlier
+                # trade (alphabetical order) — prevents the same RFQ appearing
+                # under multiple trades when a vendor covers several categories.
                 allowed_rfq_ids = trade_vendor_rfq_ids.get((cat_id, vid), set())
                 rfqs_for_v = [
                     r for r in partner_rfq_map.get(vid, [])
                     if r.id in allowed_rfq_ids
+                    and (vid, r.id) not in assigned_vendor_rfqs
                 ]
+                # Mark these (vendor, rfq) pairs as consumed by this trade
+                for _r in rfqs_for_v:
+                    assigned_vendor_rfqs.add((vid, _r.id))
 
                 pending_rfqs   = [r for r in rfqs_for_v if r.state in PENDING_STATES]
                 submitted_rfqs = [
