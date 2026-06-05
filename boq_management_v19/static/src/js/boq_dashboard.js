@@ -31,6 +31,18 @@ function approvalStatusClass(s) {
         || "bg-secondary";
 }
 
+function filterPendingSent(pendingVendors) {
+    return (pendingVendors || [])
+        .map((v) => {
+            const rfqs = (v.rfqs || []).filter((r) => r.state === "sent");
+            const oldest = rfqs.reduce((m, r) => Math.max(m, r.days_pending || 0), 0);
+            return { ...v, rfqs, rfq_count: rfqs.length, oldest_days: oldest };
+        })
+        .filter((v) => v.rfqs.length > 0)
+        .sort((a, b) => b.oldest_days - a.oldest_days);
+}
+
+
 class BoqManagerDashboardBase extends Component {
    
     static props = {
@@ -118,7 +130,7 @@ class BoqManagerDashboardBase extends Component {
             this.state.tree               = tree;
             this.state.vendorSummary      = vendorSummary;
             this.state.approvalPOs        = approvalPOs;
-            this.state.pendingVendors     = pendingVendors;
+            this.state.pendingVendors     = filterPendingSent(pendingVendors);
             this.state.recentlySubmitted  = recentlySubmitted;
         } catch (err) {
             this.state.error = err.message || "Failed to load dashboard data.";
@@ -366,7 +378,7 @@ async function _loadDashboardData(component) {
     component.state.tree              = tree;
     component.state.vendorSummary     = vendorSummary;
     component.state.approvalPOs       = approvalPOs;
-    component.state.pendingVendors    = pendingVendors;
+    component.state.pendingVendors    = filterPendingSent(pendingVendors);
     component.state.recentlySubmitted = recentlySubmitted;
 }
 
@@ -583,7 +595,7 @@ export class HeadSupplierDashboard extends BoqManagerDashboardBase {
             if (r1.status === "fulfilled") this.state.tree              = r1.value;
             if (r2.status === "fulfilled") this.state.vendorSummary     = r2.value;
             if (r3.status === "fulfilled") this.state.approvalPOs       = r3.value;
-            if (r4.status === "fulfilled") this.state.pendingVendors    = r4.value;
+            if (r4.status === "fulfilled") this.state.pendingVendors    = filterPendingSent(r4.value);
             if (r5.status === "fulfilled") this.state.recentlySubmitted = r5.value;
             if (r6.status === "fulfilled") this.state.companySummary    = r6.value;
 

@@ -44,8 +44,9 @@
                 </button>
             </xpath>
 
-            <xpath expr="//field[@name='company_type']" position="after">
-                <field name="partner_type" string="Partner Type"/>
+             <xpath expr="//field[@name='company_type']" position="after">
+                <label for="partner_type" string="Partner Type"/>
+                <field name="partner_type"/>
             </xpath>
 
             <xpath expr="//notebook" position="inside">
