@@ -45,3 +45,12 @@ class PurchaseOrderLine(models.Model):
                 if line.order_id.state not in ('draft', 'cancel'):
                     raise ValidationError(_("You cannot change the quantity after the purchase order has been sent."))
         return super().write(vals)
+
+    @api.constrains('product_qty', 'price_unit')
+    def _check_quantity_and_price(self):
+        for line in self:
+            if line.product_qty <= 0:
+                raise ValidationError(_("Quantity must be greater than zero."))
+            if line.price_unit <= 0:
+                raise ValidationError(_("Unit Price must be greater than zero."))
+
