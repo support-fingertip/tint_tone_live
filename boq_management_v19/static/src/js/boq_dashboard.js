@@ -31,6 +31,18 @@ function approvalStatusClass(s) {
         || "bg-secondary";
 }
 
+function filterPendingSent(pendingVendors) {
+    return (pendingVendors || [])
+        .map((v) => {
+            const rfqs = (v.rfqs || []).filter((r) => r.state === "sent");
+            const oldest = rfqs.reduce((m, r) => Math.max(m, r.days_pending || 0), 0);
+            return { ...v, rfqs, rfq_count: rfqs.length, oldest_days: oldest };
+        })
+        .filter((v) => v.rfqs.length > 0)
+        .sort((a, b) => b.oldest_days - a.oldest_days);
+}
+
+
 class BoqManagerDashboardBase extends Component {
    
     static props = {
@@ -118,7 +130,7 @@ class BoqManagerDashboardBase extends Component {
             this.state.tree               = tree;
             this.state.vendorSummary      = vendorSummary;
             this.state.approvalPOs        = approvalPOs;
-            this.state.pendingVendors     = pendingVendors;
+            this.state.pendingVendors     = filterPendingSent(pendingVendors);
             this.state.recentlySubmitted  = recentlySubmitted;
         } catch (err) {
             this.state.error = err.message || "Failed to load dashboard data.";
@@ -214,13 +226,31 @@ class BoqManagerDashboardBase extends Component {
 
     get treeTotals() {
         const t = this.filteredTree;
+        const uniqueVendorIds = new Set();
+        const stateCounts = {};
+        t.forEach(trade => {
+            (trade.vendors || []).forEach(v => {
+                uniqueVendorIds.add(v.vendor_id);
+                (v.rfqs || []).forEach(r => {
+                    stateCounts[r.state] = (stateCounts[r.state] || 0) + 1;
+                });
+            });
+        });
+        const STATE_ORDER = ['draft', 'sent', 'submitted', 'to approve', 'purchase', 'done', 'cancel'];
+        const STATE_LABELS = {
+            draft: 'Draft', sent: 'Sent', submitted: 'Submitted',
+            'to approve': 'Awaiting Approval', purchase: 'PO', done: 'Done', cancel: 'Cancelled',
+        };
+        const stateBreakdown = STATE_ORDER
+            .filter(s => stateCounts[s] > 0)
+            .map(s => ({ state: s, label: STATE_LABELS[s] || s, count: stateCounts[s] }));
         return {
-            trades:    t.length,
-            vendors:   t.reduce((s, r) => s + (r.vendor_count    || 0), 0),
-            rfqs:      t.reduce((s, r) => s + (r.rfq_count       || 0), 0),
-            pending:   t.reduce((s, r) => s + (r.pending_count   || 0), 0),
-            submitted: t.reduce((s, r) => s + (r.submitted_count || 0), 0),
-            value:     t.reduce((s, r) => s + (r.total_value     || 0), 0),
+            trades:         t.length,
+            vendors:        uniqueVendorIds.size,
+            rfqs:           t.reduce((s, r) => s + (r.rfq_count       || 0), 0),
+            submitted:      t.reduce((s, r) => s + (r.submitted_count || 0), 0),
+            value:          t.reduce((s, r) => s + (r.total_value     || 0), 0),
+            stateBreakdown,
         };
     }
 
@@ -366,7 +396,7 @@ async function _loadDashboardData(component) {
     component.state.tree              = tree;
     component.state.vendorSummary     = vendorSummary;
     component.state.approvalPOs       = approvalPOs;
-    component.state.pendingVendors    = pendingVendors;
+    component.state.pendingVendors    = filterPendingSent(pendingVendors);
     component.state.recentlySubmitted = recentlySubmitted;
 }
 
@@ -488,30 +518,30 @@ export class HeadSupplierDashboard extends BoqManagerDashboardBase {
 
     async removeCompany(ev, cid) {
         if (ev) ev.stopPropagation();
-        const all = this.state.availableCompanies.map(c => c.id);
-        const cur = this.state.selectedCompanyIds;
-        if (cur.length === 0) {
-            this.state.selectedCompanyIds = all.filter(id => id !== cid);
-        } else {
-            const next = cur.filter(id => id !== cid);
-            this.state.selectedCompanyIds = next.length > 0 ? next : [];
-        }
+        const next = this.state.selectedCompanyIds.filter(id => id !== cid);
+        this.state.selectedCompanyIds = next; // empty = all
         await this._reloadFiltered();
     }
 
     async toggleCompany(cid) {
-        const all   = this.state.availableCompanies.map(c => c.id);
-        const cur   = this.state.selectedCompanyIds;
+        const all = this.state.availableCompanies.map(c => c.id);
+        const cur = this.state.selectedCompanyIds;
 
+        let next;
         if (cur.length === 0) {
-            this.state.selectedCompanyIds = all.filter(id => id !== cid);
+            // Currently showing all — selecting one company means "show only this one"
+            next = [cid];
         } else if (cur.includes(cid)) {
-            const next = cur.filter(id => id !== cid);
-            this.state.selectedCompanyIds = next.length > 0 ? next : [];
+            // Deselect: remove from the selection
+            next = cur.filter(id => id !== cid);
+            // Empty selection means "all" again
         } else {
-            const next = [...cur, cid];
-            this.state.selectedCompanyIds = next.length === all.length ? [] : next;
+            // Add this company to the selection
+            next = [...cur, cid];
+            // If every company is now selected, treat as "all" (empty)
+            if (next.length === all.length) next = [];
         }
+        this.state.selectedCompanyIds = next;
         await this._reloadFiltered();
     }
 
@@ -583,7 +613,7 @@ export class HeadSupplierDashboard extends BoqManagerDashboardBase {
             if (r1.status === "fulfilled") this.state.tree              = r1.value;
             if (r2.status === "fulfilled") this.state.vendorSummary     = r2.value;
             if (r3.status === "fulfilled") this.state.approvalPOs       = r3.value;
-            if (r4.status === "fulfilled") this.state.pendingVendors    = r4.value;
+            if (r4.status === "fulfilled") this.state.pendingVendors    = filterPendingSent(r4.value);
             if (r5.status === "fulfilled") this.state.recentlySubmitted = r5.value;
             if (r6.status === "fulfilled") this.state.companySummary    = r6.value;
 

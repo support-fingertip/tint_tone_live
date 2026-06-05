@@ -695,12 +695,12 @@ class TtsQuotation(models.Model):
         if line.category_type == 'civil':
             name = line.service_item or line.subcategory or line.category or 'Civil Service'
             product = Product.search(
-                [('name', '=', name), ('detailed_type', '=', 'service')], limit=1
+                [('name', '=', name), ('type', '=', 'service')], limit=1
             )
             if not product:
                 product = Product.create({
                     'name': name,
-                    'detailed_type': 'service',
+                    'type': 'service',
                     'sale_ok': True,
                 })
             return product

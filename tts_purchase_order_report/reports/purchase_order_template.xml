@@ -232,8 +232,13 @@
                 </thead>
                 <tbody>
                     <t t-set="line_no" t-value="0"/>
+                    <t t-set="adv_names" t-value="('Down Payment', 'Running Payment', 'Advance Payment', 'Advance payment')"/>
                     <t t-foreach="o.order_line" t-as="line">
-                        <t t-if="not line.display_type">
+                        <t t-set="is_adv"
+                           t-value="line.is_downpayment
+                                    or any([n in (line.name or '') for n in adv_names])
+                                    or any([n in (line.product_id.name or '') for n in adv_names])"/>
+                        <t t-if="not line.display_type and not is_adv">
                             <t t-set="line_no" t-value="line_no + 1"/>
                             <t t-set="gst_pct" t-value="sum(line.tax_ids.filtered(lambda t: t.amount_type == 'percent').mapped('amount'))"/>
                             <tr>
@@ -242,11 +247,11 @@
                                 <td><span t-esc="line.name or ''"/></td>
                                 <td><span t-esc="line.product_id.default_code or line.product_id.categ_id.name or ''"/></td>
                                 <td class="tts-center"><span t-esc="line.product_uom_id.name or ''"/></td>
-<!--                                <td class="tts-center">-->
-<!--                                    <span t-if="line.date_planned"-->
-<!--                                          t-field="line.date_planned"-->
-<!--                                          t-options='{"widget": "date"}'/>-->
-<!--                                </td>-->
+            <!--                    <td class="tts-center">-->
+            <!--                        <span t-if="line.date_planned"-->
+            <!--                              t-field="line.date_planned"-->
+            <!--                              t-options='{"widget": "date"}'/>-->
+            <!--                    </td>-->
                                 <td class="tts-right"><span t-esc="'%.2f' % line.product_qty"/></td>
                                 <td class="tts-right"><span t-esc="'%.2f' % gst_pct"/>%</td>
                                 <td class="tts-right"><span t-esc="'%.2f' % (line.discount or 0.0)"/>%</td>
@@ -281,30 +286,30 @@
                                     <span t-esc="'{:,.2f}'.format(o.amount_untaxed)"/>
                                 </td>
                             </tr>
-<!--                            <tr>-->
-<!--                                <td class="totals-lbl">Freight Charge</td>-->
-<!--                                <td class="totals-val">Rs.-->
-<!--                                    <span t-esc="'{:,.2f}'.format(o.freight_charge or 0.0)"/>-->
-<!--                                </td>-->
-<!--                            </tr>-->
-<!--                            <tr>-->
-<!--                                <td class="totals-lbl">CGST</td>-->
-<!--                                <td class="totals-val">Rs.-->
-<!--                                    <span t-esc="'{:,.2f}'.format(o.amount_cgst or 0.0)"/>-->
-<!--                                </td>-->
-<!--                            </tr>-->
-<!--                            <tr>-->
-<!--                                <td class="totals-lbl">SGST</td>-->
-<!--                                <td class="totals-val">Rs.-->
-<!--                                    <span t-esc="'{:,.2f}'.format(o.amount_sgst or 0.0)"/>-->
-<!--                                </td>-->
-<!--                            </tr>-->
-<!--                            <tr>-->
-<!--                                <td class="totals-lbl">Packing Tax</td>-->
-<!--                                <td class="totals-val">Rs.-->
-<!--                                    <span t-esc="'{:,.2f}'.format(o.packing_tax or 0.0)"/>-->
-<!--                                </td>-->
-<!--                            </tr>-->
+                            <tr>
+                                <td class="totals-lbl">Freight Charge</td>
+                                <td class="totals-val">Rs.
+                                    <span t-esc="'{:,.2f}'.format(o.freight_charge or 0.0)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="totals-lbl">CGST</td>
+                                <td class="totals-val">Rs.
+                                    <span t-esc="'{:,.2f}'.format(o.amount_cgst or 0.0)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="totals-lbl">SGST</td>
+                                <td class="totals-val">Rs.
+                                    <span t-esc="'{:,.2f}'.format(o.amount_sgst or 0.0)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="totals-lbl">Packing Tax</td>
+                                <td class="totals-val">Rs.
+                                    <span t-esc="'{:,.2f}'.format(o.packing_tax or 0.0)"/>
+                                </td>
+                            </tr>
                             <tr>
                                 <td class="totals-lbl totals-gross">Gross Amount</td>
                                 <td class="totals-val totals-gross">

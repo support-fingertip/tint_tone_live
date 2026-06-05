@@ -39,7 +39,7 @@ class ResPartner(models.Model):
             ('employee', 'Employee'),
             ('customer', 'Customer'),
         ],
-        string='Partner Type',
+        string='Partner Type', required=True,
         index=True,
         help='Controls how this partner is used in BOQ workflows. '
              '"Vendor" creates Vendor RFQs; "Supplier" creates Supplier RFQs.',
