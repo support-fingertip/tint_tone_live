@@ -1290,7 +1290,7 @@
 .boq_cc_name {
     font-size: 0.9rem;
     color: #1a1a1a;
-    max-width: 160px;
+    word-break: break-word;
 }
 
 .boq_chip_notif_btn {

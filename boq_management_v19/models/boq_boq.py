@@ -709,20 +709,26 @@ class BoqBoq(models.Model):
         return cids if cids else [self.env.company.id]
 
     def _expand_company_ids(self, company_ids):
-        """Expand company_ids to include child companies (branches).
+        """Expand company_ids bidirectionally:
+        - parent selected → include child branches
+        - child selected → include its parent company
 
-        When a parent company (e.g. Tamil Nadu) is in the list, its branches
-        (e.g. OMR, Anna Nagar) are added automatically so the filter covers
-        all data belonging to those branches.
+        This ensures BOQs stored under either the parent or a branch company
+        are always found when either is selected.
         """
         if not company_ids:
             return company_ids
+        cid_set = set(company_ids)
+        # parent → children
         children = self.env['res.company'].sudo().search([
-            ('parent_id', 'in', list(company_ids))
+            ('parent_id', 'in', list(cid_set))
         ])
-        if children:
-            return list(set(company_ids) | set(children.ids))
-        return list(company_ids)
+        cid_set |= set(children.ids)
+        # children → parent
+        parents = self.env['res.company'].sudo().browse(list(cid_set)).mapped('parent_id')
+        parents = parents.filtered(lambda p: p.id)
+        cid_set |= set(parents.ids)
+        return list(cid_set)
 
     def _get_boq_type_domain(self, dashboard_type):
         """

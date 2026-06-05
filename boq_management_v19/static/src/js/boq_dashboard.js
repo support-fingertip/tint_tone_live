@@ -227,14 +227,30 @@ class BoqManagerDashboardBase extends Component {
     get treeTotals() {
         const t = this.filteredTree;
         const uniqueVendorIds = new Set();
-        t.forEach(trade => (trade.vendors || []).forEach(v => uniqueVendorIds.add(v.vendor_id)));
+        const stateCounts = {};
+        t.forEach(trade => {
+            (trade.vendors || []).forEach(v => {
+                uniqueVendorIds.add(v.vendor_id);
+                (v.rfqs || []).forEach(r => {
+                    stateCounts[r.state] = (stateCounts[r.state] || 0) + 1;
+                });
+            });
+        });
+        const STATE_ORDER = ['draft', 'sent', 'submitted', 'to approve', 'purchase', 'done', 'cancel'];
+        const STATE_LABELS = {
+            draft: 'Draft', sent: 'Sent', submitted: 'Submitted',
+            'to approve': 'Awaiting Approval', purchase: 'PO', done: 'Done', cancel: 'Cancelled',
+        };
+        const stateBreakdown = STATE_ORDER
+            .filter(s => stateCounts[s] > 0)
+            .map(s => ({ state: s, label: STATE_LABELS[s] || s, count: stateCounts[s] }));
         return {
-            trades:    t.length,
-            vendors:   uniqueVendorIds.size,
-            rfqs:      t.reduce((s, r) => s + (r.rfq_count       || 0), 0),
-            pending:   t.reduce((s, r) => s + (r.pending_count   || 0), 0),
-            submitted: t.reduce((s, r) => s + (r.submitted_count || 0), 0),
-            value:     t.reduce((s, r) => s + (r.total_value     || 0), 0),
+            trades:         t.length,
+            vendors:        uniqueVendorIds.size,
+            rfqs:           t.reduce((s, r) => s + (r.rfq_count       || 0), 0),
+            submitted:      t.reduce((s, r) => s + (r.submitted_count || 0), 0),
+            value:          t.reduce((s, r) => s + (r.total_value     || 0), 0),
+            stateBreakdown,
         };
     }
 

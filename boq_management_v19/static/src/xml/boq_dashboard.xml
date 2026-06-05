@@ -438,7 +438,7 @@
                                         <t t-esc="cs.company_initial"/>
                                     </div>
                                     <div class="min-w-0">
-                                        <div class="fw-bold text-truncate boq_cc_name"
+                                        <div class="fw-bold boq_cc_name"
                                              t-esc="cs.company_name"/>
                                         <small class="text-muted">
                                             <t t-esc="cs.total_boqs"/> BOQ<t t-if="cs.total_boqs !== 1">s</t>
@@ -507,10 +507,11 @@
                     <i class="fa fa-shopping-cart me-1"/>
                     <strong><t t-esc="treeTotals.rfqs"/></strong> RFQs
                 </span>
-                <span t-if="treeTotals.pending > 0" class="boq_totals_chip">
-                    <i class="fa fa-clock-o me-1"/>
-                    <strong><t t-esc="treeTotals.pending"/></strong> Pending
-                </span>
+                <t t-foreach="treeTotals.stateBreakdown" t-as="sb" t-key="sb.state">
+                    <span t-attf-class="boq_totals_chip badge #{ rfqStateClass(sb.state) }">
+                        <strong><t t-esc="sb.count"/></strong>&#160;<t t-esc="sb.label"/>
+                    </span>
+                </t>
                 <t t-if="treeTotals.submitted > 0">
                     <button t-attf-class="boq_chip_notification boq_chip_notif_btn
                                          #{ state.showRecentPanel ? 'boq_chip_notif_active' : '' }"
