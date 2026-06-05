@@ -51,6 +51,6 @@ class PurchaseOrderLine(models.Model):
         for line in self:
             if line.product_qty <= 0:
                 raise ValidationError(_("Quantity must be greater than zero."))
-            if line.price_unit <= 0:
-                raise ValidationError(_("Unit Price must be greater than zero."))
+            if line.price_unit < 0:
+                raise ValidationError(_("Unit Price cannot be lower than zero."))
 
