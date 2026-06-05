@@ -167,7 +167,7 @@
             id="menu_vendor_po"
             name="Purchase Orders"
             parent="menu_vendor_orders"
-            action="purchase.purchase_form_action"
+            action="action_purchase_order_vendor"
             sequence="2"
             groups="boq_management_v19.group_vendor"
     />
@@ -297,7 +297,7 @@
             id="menu_supplier_po"
             name="Purchase Orders"
             parent="menu_supplier_orders"
-            action="purchase.purchase_form_action"
+            action="action_purchase_order_supplier"
             sequence="2"
             groups="boq_management_v19.group_supplier"
     />
