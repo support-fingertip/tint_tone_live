@@ -686,11 +686,9 @@
                                     <i class="fa fa-shopping-cart me-1"/>
                                     <t t-esc="trade.rfq_count"/>
                                 </span>
-                                <t t-if="trade.pending_count > 0">
-                                    <span class="badge boq_badge_neutral rounded-pill ms-1"
-                                          title="Pending — awaiting quotation">
-                                        <i class="fa fa-clock-o me-1"/>
-                                        <t t-esc="trade.pending_count"/> pending
+                                <t t-foreach="trade.state_summary || []" t-as="ss" t-key="ss.state">
+                                    <span t-attf-class="badge rounded-pill ms-1 {{ rfqStateClass(ss.state) }}">
+                                        <t t-esc="ss.count"/>&#160;<t t-esc="ss.state_label"/>
                                     </span>
                                 </t>
                                 <t t-if="trade.submitted_count > 0">
@@ -763,11 +761,9 @@
                                             RFQ<t t-if="vendor.rfq_count !== 1">s</t>
                                         </span>
 
-                                        <t t-if="vendor.pending_count > 0">
-                                            <span class="badge boq_badge_neutral rounded-pill ms-1"
-                                                  title="RFQ sent — no quotation yet">
-                                                <i class="fa fa-clock-o me-1"/>
-                                                <t t-esc="vendor.pending_count"/> pending
+                                        <t t-foreach="vendor.state_summary || []" t-as="ss" t-key="ss.state">
+                                            <span t-attf-class="badge rounded-pill ms-1 {{ rfqStateClass(ss.state) }}">
+                                                <t t-esc="ss.count"/>&#160;<t t-esc="ss.state_label"/>
                                             </span>
                                         </t>
                                         <t t-if="vendor.recently_submitted_count > 0">
