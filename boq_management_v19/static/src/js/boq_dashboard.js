@@ -226,9 +226,11 @@ class BoqManagerDashboardBase extends Component {
 
     get treeTotals() {
         const t = this.filteredTree;
+        const uniqueVendorIds = new Set();
+        t.forEach(trade => (trade.vendors || []).forEach(v => uniqueVendorIds.add(v.vendor_id)));
         return {
             trades:    t.length,
-            vendors:   t.reduce((s, r) => s + (r.vendor_count    || 0), 0),
+            vendors:   uniqueVendorIds.size,
             rfqs:      t.reduce((s, r) => s + (r.rfq_count       || 0), 0),
             pending:   t.reduce((s, r) => s + (r.pending_count   || 0), 0),
             submitted: t.reduce((s, r) => s + (r.submitted_count || 0), 0),
@@ -559,7 +561,8 @@ export class HeadSupplierDashboard extends BoqManagerDashboardBase {
                 const companies = await this.orm.call(
                     "boq.boq", "get_available_companies", [], {}
                 ).catch(() => []);
-                this.state.availableCompanies = companies;
+                // Exclude parent companies (those that have children in the list)
+                this.state.availableCompanies = companies.filter(c => !c.is_parent);
             }
             await this._loadData();
         } catch (err) {

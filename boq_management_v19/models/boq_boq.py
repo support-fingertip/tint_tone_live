@@ -1184,8 +1184,8 @@ class BoqBoq(models.Model):
     def get_dashboard_tree_data(self, dashboard_type='vendor', company_ids=None):
 
         RFQ_STATE_LABELS = {
-            'draft':      'Quote Requested',
-            'sent':       'Sent to Vendor',
+            'draft':      'Draft',
+            'sent':       'Sent',
             'submitted':  'Submitted',
             'to approve': 'Awaiting Approval',
             'purchase':   'Approved',
@@ -1676,8 +1676,8 @@ class BoqBoq(models.Model):
         PENDING_STATES = {'draft', 'sent'}
 
         RFQ_STATE_LABELS = {
-            'draft': 'Quote Requested',
-            'sent':  'Sent to Vendor',
+            'draft': 'Draft',
+            'sent':  'Sent',
         }
 
         company_ids = company_ids or self._get_allowed_company_ids()

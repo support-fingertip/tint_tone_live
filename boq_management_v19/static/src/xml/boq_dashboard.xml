@@ -863,12 +863,6 @@
                                                     <t t-esc="rfq.state_label"/>
                                                 </span>
 
-                                                <t t-if="rfq.is_pending">
-                                                    <span class="badge boq_badge_neutral rounded-pill ms-1"
-                                                          title="Awaiting quotation">
-                                                        <i class="fa fa-clock-o me-1"/>Pending
-                                                    </span>
-                                                </t>
 
                                                 <t t-if="rfq.is_recently_submitted">
                                                     <span class="badge boq_badge_submitted rounded-pill ms-1"
