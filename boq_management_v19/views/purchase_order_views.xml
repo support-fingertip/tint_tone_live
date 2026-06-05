@@ -115,14 +115,14 @@
         <field name="name">Purchase Orders</field>
         <field name="res_model">purchase.order</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[('partner_id.partner_type', '=', 'vendor')]</field>
+        <field name="domain">[('partner_type', '=', 'vendor'), ('state', '=', 'purchase')]</field>
     </record>
 
     <record id="action_purchase_order_supplier" model="ir.actions.act_window">
         <field name="name">Purchase Orders</field>
         <field name="res_model">purchase.order</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[('partner_id.partner_type', '=', 'supplier')]</field>
+        <field name="domain">[('partner_type', '=', 'supplier'), ('state', '=', 'purchase')]</field>
     </record>
 
     <record id="action_vendor_purchase_report" model="ir.actions.act_window">
