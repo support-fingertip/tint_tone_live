@@ -119,8 +119,9 @@
                     <strong>PO Approval: </strong> The PO has been rejected.
                 </div>
 
-                <!-- Pending -->
+               <!-- Pending -->
                 <div class="alert alert-info" role="alert"
+                     groups="infinys_margin_validation.group_vendor,infinys_margin_validation.group_vendor_manager_dashboard"
                      invisible="state != 'to approve'">
                     <strong>Approval:</strong>
                     PO approval pending
@@ -128,6 +129,7 @@
 
                 <!-- Approved -->
                 <div class="alert alert-success" role="alert"
+                     groups="infinys_margin_validation.group_vendor,infinys_margin_validation.group_vendor_manager_dashboard"
                      invisible="state != 'purchase'">
                     <strong>Approval:</strong>
                     PO approved successfully
