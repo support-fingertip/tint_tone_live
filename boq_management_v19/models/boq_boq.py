@@ -296,16 +296,27 @@ class BoqBoq(models.Model):
         compute='_compute_rfq_count',
     )
 
-    @api.depends('rfq_ids')
     def _compute_rfq_count(self):
-        user_partner = self.env.user.partner_id
-        ptype = user_partner.partner_type
-        allowed_companies = self.env.companies.ids
+        # `boq_id` on purchase.order is a non-stored computed field (store=False),
+        # so it cannot be used in search_count() — that would try to hit a DB column
+        # that does not exist and raise a ValueError.
+        # Instead, read the count directly from the M2M join table.
+        if not self.ids:
+            for rec in self:
+                rec.rfq_count = 0
+            return
+        self.env.cr.execute(
+            """
+            SELECT boq_id, COUNT(purchase_id)
+              FROM boq_boq_purchase_order_rel
+             WHERE boq_id IN %s
+             GROUP BY boq_id
+            """,
+            (tuple(self.ids),)
+        )
+        counts = dict(self.env.cr.fetchall())
         for rec in self:
-            rfqs = rec.rfq_ids.filtered(lambda r: r.company_id.id in allowed_companies)
-            if ptype in ('vendor', 'supplier'):
-                rfqs = rfqs.filtered(lambda r: r.partner_id.partner_type == ptype)
-            rec.rfq_count = len(rfqs)
+            rec.rfq_count = counts.get(rec.id, 0)
 
     @api.depends('line_ids.subtotal', 'line_ids.tax_ids', 'line_ids.qty',
                  'line_ids.unit_price', 'line_ids.discount', 'line_ids.category_id',
@@ -652,22 +663,15 @@ class BoqBoq(models.Model):
 
     def action_view_rfqs(self):
         self.ensure_one()
-        user_partner = self.env.user.partner_id
-        ptype = user_partner.partner_type
-        allowed_companies = self.env.companies.ids
-        domain = [
-            ('id', 'in', self.rfq_ids.ids),
-            ('company_id', 'in', allowed_companies),
-        ]
-
-        if ptype in ('vendor', 'supplier'):
-            domain.append(('partner_id.partner_type', '=', ptype))
-        rfqs = self.env['purchase.order'].search(domain)
-        if len(rfqs) == 1:
+        # Use rfq_ids.ids directly (read from the M2M join table) so this
+        # is consistent with _compute_rfq_count — the count shown on the
+        # smart button always matches the records opened when clicking it.
+        rfq_ids = self.rfq_ids.ids
+        if len(rfq_ids) == 1:
             return {
                 'type': 'ir.actions.act_window',
                 'res_model': 'purchase.order',
-                'res_id': rfqs.id,
+                'res_id': rfq_ids[0],
                 'view_mode': 'form',
             }
 
@@ -676,7 +680,7 @@ class BoqBoq(models.Model):
             'name': _('RFQs — %s') % self.name,
             'res_model': 'purchase.order',
             'view_mode': 'list,form',
-            'domain': domain,
+            'domain': [('id', 'in', rfq_ids)],
         }
 
     @api.model
