@@ -295,11 +295,9 @@ class PurchaseOrderLineBoqExtend(models.Model):
         self.price_unit = 0.0
         return res
 
-    @api.depends(
-        'product_qty', 'product_uom', 'company_id',
-        'order_id.partner_id', 'order_id.currency_id',
-        'customer_price',
-    )
+    @api.depends('product_qty', 'product_uom', 'company_id',
+                 'order_id.partner_id', 'order_id.currency_id',
+                 'customer_price', )
     def _compute_price_unit(self):
         for line in self:
             if not line.customer_price:
