@@ -221,9 +221,7 @@
 
             <!-- Confirm Order for draft state -->
             <xpath expr="//button[@name='button_confirm'][@id='draft_confirm']" position="attributes">
-                <attribute name="invisible">
-                    state != 'draft' or (has_margin_below_threshold and margin_approval_status != 'approved')
-                </attribute>
+                <attribute name="invisible">1</attribute>
             </xpath>
 
             <!--  Confirm Order for sent state -->
