@@ -295,6 +295,13 @@ class PurchaseOrderLineBoqExtend(models.Model):
         self.price_unit = 0.0
         return res
 
+    @api.depends('product_qty', 'product_uom_id', 'company_id', 'order_id.partner_id')
+    def _price_unit_zero(self):
+        super()._price_unit_zero()
+        for line in self:
+            if not line.customer_price:
+                line.price_unit = 0.0
+
     @api.onchange('product_qty', 'product_uom')
     def _onchange_quantity(self):
         existing_price = self.price_unit
