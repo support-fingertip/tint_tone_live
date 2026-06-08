@@ -98,7 +98,7 @@
                 <field name="margin_approval_status" invisible="1"/>
                 <field name="is_margin_approver" invisible="1"/>
                 <div class="alert alert-warning" role="alert"
-                     groups="infinys_margin_validation.group_vendor,infinys_margin_validation.group_vendor_manager_dashboard"
+                    groups="boq_management_v19.group_vendor,boq_management_v19.group_vendor_manager_dashboard"
                      invisible="not has_margin_below_threshold or margin_approval_status == 'approved'">
                     <strong>Margin Alert: </strong>
                     <field name="margin_warning_message" nolabel="1"/>
@@ -122,7 +122,7 @@
 
                <!-- Pending -->
                 <div class="alert alert-info" role="alert"
-                     groups="infinys_margin_validation.group_vendor,infinys_margin_validation.group_vendor_manager_dashboard"
+                     groups="boq_management_v19.group_vendor,boq_management_v19.group_vendor_manager_dashboard"
                      invisible="state != 'to approve'">
                     <strong>Approval:</strong>
                     PO approval pending
@@ -130,7 +130,7 @@
 
                 <!-- Approved -->
                 <div class="alert alert-success" role="alert"
-                     groups="infinys_margin_validation.group_vendor,infinys_margin_validation.group_vendor_manager_dashboard"
+                     groups="boq_management_v19.group_vendor,boq_management_v19.group_vendor_manager_dashboard"
                      invisible="state != 'purchase'">
                     <strong>Approval:</strong>
                     PO approved successfully
