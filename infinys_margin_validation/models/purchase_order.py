@@ -119,7 +119,17 @@ class PurchaseOrder(models.Model):
                 raise UserError(
                     '\n'.join(warning_parts) + '\n\n' + _('Unit price should be greater than zero.'))
 
-            if order.has_margin_below_threshold and order.margin_approval_status not in ('approved',):
+            allowed_user = (
+                    self.env.user.has_group('boq_management_v19.group_vendor') or
+                    self.env.user.has_group('boq_management_v19.group_vendor_manager_dashboard') or
+                    self.env.user.has_group('boq_management_v19.group_procurement_manager_dashboard')
+            )
+
+            if (
+                    not allowed_user
+                    and order.has_margin_below_threshold
+                    and order.margin_approval_status != 'approved'
+            ):
                 raise UserError(_(
                     "Cannot confirm this order. Some product margins are below the threshold. "
                     "Please request and obtain margin approval first."
