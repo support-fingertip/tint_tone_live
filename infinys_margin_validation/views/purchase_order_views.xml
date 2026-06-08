@@ -52,13 +52,13 @@
             <xpath expr="//field[@name='order_line']//list//field[@name='price_subtotal']" position="after">
 
                 <!-- A: Required Margin input — triggers SP computation -->
-                <field name="required_margin"
-                       string="Req. Margin (%)"
-                       widget="float"
-                       options="{'digits': [16, 2]}"
-                       optional="show"
-                       column_invisible="parent.partner_type == 'supplier'"
-                       groups="boq_management_v19.group_vendor"/>
+<!--                <field name="required_margin"-->
+<!--                       string="Req. Margin (%)"-->
+<!--                       widget="float"-->
+<!--                       options="{'digits': [16, 2]}"-->
+<!--                       optional="show"-->
+<!--                       column_invisible="parent.partner_type == 'supplier'"-->
+<!--                       groups="boq_management_v19.group_vendor"/>-->
 
                 <!-- B: Selling Price — editable, also auto-filled when margin is entered -->
                 <field name="customer_price"
