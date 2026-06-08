@@ -117,7 +117,7 @@ class PurchaseOrder(models.Model):
 
             if warning_parts:
                 raise UserError(
-                    '\n'.join(warning_parts) + '\n\n' + _('Please verify before requesting margin approval.'))
+                    '\n'.join(warning_parts) + '\n\n' + _('Unit price should be greater than zero.'))
 
             if order.has_margin_below_threshold and order.margin_approval_status not in ('approved',):
                 raise UserError(_(
@@ -171,7 +171,7 @@ class PurchaseOrder(models.Model):
             warning_parts.append(_('product have 0 unit price.'))
 
         if warning_parts:
-            raise UserError('\n'.join(warning_parts) + '\n\n' + _('Please verify before requesting margin approval.'))
+            raise UserError('\n'.join(warning_parts) + '\n\n' + _('Unit price should be greater than zero'))
 
         if not self.has_margin_below_threshold:
             raise UserError(_("All margins are within acceptable thresholds. No approval needed."))
