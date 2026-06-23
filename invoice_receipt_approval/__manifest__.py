@@ -15,6 +15,7 @@
         'data/payment_email_template.xml',
         'views/invoice_reject_wizard_views.xml',
         'views/res_config_settings_views.xml',
+        'views/purchase_quotation_templates.xml',
         'views/account_move_views.xml',
         'views/hr_expense_views.xml',
     ],
