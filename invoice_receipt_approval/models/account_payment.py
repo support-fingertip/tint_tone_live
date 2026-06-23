@@ -1,7 +1,9 @@
-from odoo import models, api
+from odoo import fields, models
 
 class AccountPayment(models.Model):
     _inherit = 'account.payment'
+
+    dummy = fields.Char(string='Dummy Field')
 
     def action_post(self):
         res = super(AccountPayment, self).action_post()
