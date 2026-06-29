@@ -50,6 +50,7 @@
         <record id="group_supplier" model="res.groups">
             <field name="name">Supplier</field>
             <field name="privilege_id" ref="privilege_supplier"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
         </record>
 
         <record id="privilege_vendor_manager_dashboard" model="res.groups.privilege">
