@@ -228,7 +228,7 @@
             <!--  Confirm Order for sent state -->
             <xpath expr="//button[@name='button_confirm'][@id='bid_confirm']" position="attributes">
                 <attribute name="invisible">
-                    state != 'sent' or (has_margin_below_threshold and margin_approval_status != 'approved')
+                    state != 'sent' or (has_margin_below_threshold and margin_approval_status != 'approved' and partner_id.partner_type == 'vendor')
                 </attribute>
             </xpath>
 

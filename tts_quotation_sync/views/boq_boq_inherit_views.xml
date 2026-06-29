@@ -7,7 +7,7 @@
         create standalone BOQs from the menu.  BOQ creation is available
         via the "Create BOQ" button on the tts.quotation form.
     -->
-    <record id="view_boq_boq_list_tts_no_create" model="ir.ui.view">
+    <!-- <record id="view_boq_boq_list_tts_no_create" model="ir.ui.view">
         <field name="name">boq.boq.list.tts.no.create</field>
         <field name="model">boq.boq</field>
         <field name="inherit_id" ref="boq_management_v19.view_boq_boq_list"/>
@@ -16,7 +16,7 @@
                 <attribute name="create">0</attribute>
             </list>
         </field>
-    </record>
+    </record> -->
 
     <!--
         Show the originating TTS Quotation on the BOQ form (read-only,
