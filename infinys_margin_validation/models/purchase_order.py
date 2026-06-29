@@ -67,9 +67,14 @@ class PurchaseOrder(models.Model):
             ]).mapped('approver_id')
             order.is_margin_approver = self.env.user in approvers
 
-    @api.depends('order_line.is_margin_below_threshold')
+    @api.depends('order_line.is_margin_below_threshold', 'partner_id.partner_type')
     def _compute_has_margin_below_threshold(self):
         for order in self:
+            if order.partner_id.partner_type == 'supplier':
+                order.has_margin_below_threshold = False
+                order.margin_warning_message = False
+                continue
+
             low_lines = order.order_line.filtered(
                 lambda l: l.is_margin_below_threshold and not l.display_type
             )
