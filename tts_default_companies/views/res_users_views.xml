@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_users_form_inherit_default_companies" model="ir.ui.view">
+            <field name="name">res.users.form.inherit.default.companies</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="arch" type="xml">
+                <!-- Find the company_id field that's labeled "Default Company" and insert our new field right after it -->
+                <xpath expr="//page[@name='access_rights']//field[@name='company_id']" position="after">
+                    <field string="Default Enabled Companies" 
+                           name="default_enabled_company_ids" 
+                           widget="many2many_tags" 
+                           options="{'no_create': True}" 
+                           invisible="companies_count &lt;= 1"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
