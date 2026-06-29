@@ -122,7 +122,7 @@
 
                <!-- Pending -->
                 <div class="alert alert-info" role="alert"
-                     groups="boq_management_v19.group_vendor,boq_management_v19.group_vendor_manager_dashboard"
+                     groups="boq_management_v19.group_vendor,boq_management_v19.group_vendor_manager_dashboard,boq_management_v19.group_supplier,boq_management_v19.group_procurement_manager_dashboard"
                      invisible="state != 'to approve'">
                     <strong>Approval:</strong>
                     PO approval pending
@@ -130,7 +130,7 @@
 
                 <!-- Approved -->
                 <div class="alert alert-success" role="alert"
-                     groups="boq_management_v19.group_vendor,boq_management_v19.group_vendor_manager_dashboard"
+                     groups="boq_management_v19.group_vendor,boq_management_v19.group_vendor_manager_dashboard,boq_management_v19.group_supplier,boq_management_v19.group_procurement_manager_dashboard"
                      invisible="state != 'purchase'">
                     <strong>Approval:</strong>
                     PO approved successfully
