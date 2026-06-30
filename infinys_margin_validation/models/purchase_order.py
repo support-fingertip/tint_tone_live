@@ -67,9 +67,14 @@ class PurchaseOrder(models.Model):
             ]).mapped('approver_id')
             order.is_margin_approver = self.env.user in approvers
 
-    @api.depends('order_line.is_margin_below_threshold')
+    @api.depends('order_line.is_margin_below_threshold', 'partner_id.partner_type')
     def _compute_has_margin_below_threshold(self):
         for order in self:
+            if order.partner_id.partner_type == 'supplier':
+                order.has_margin_below_threshold = False
+                order.margin_warning_message = False
+                continue
+
             low_lines = order.order_line.filtered(
                 lambda l: l.is_margin_below_threshold and not l.display_type
             )
@@ -117,7 +122,7 @@ class PurchaseOrder(models.Model):
 
             if warning_parts:
                 raise UserError(
-                    '\n'.join(warning_parts) + '\n\n' + _('Unit price should be greater than zero'))
+                    '\n'.join(warning_parts) + '\n\n' + _('Unit price should be greater than zero.'))
 
             allowed_user = (
                     self.env.user.has_group('boq_management_v19.group_vendor') or

@@ -305,7 +305,6 @@ class PurchaseOrderLineBoqExtend(models.Model):
             else:
                 super(PurchaseOrderLineBoqExtend, line)._compute_price_unit()
 
-
     @api.onchange('product_qty', 'product_uom')
     def _onchange_quantity(self):
         existing_price = self.price_unit

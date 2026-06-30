@@ -98,8 +98,8 @@
                 <field name="margin_approval_status" invisible="1"/>
                 <field name="is_margin_approver" invisible="1"/>
                 <div class="alert alert-warning" role="alert"
-                    groups="boq_management_v19.group_vendor,boq_management_v19.group_vendor_manager_dashboard"
-                     invisible="not has_margin_below_threshold or margin_approval_status == 'approved'">
+                     groups="boq_management_v19.group_vendor,boq_management_v19.group_vendor_manager_dashboard"
+                     invisible="not has_margin_below_threshold or margin_approval_status == 'approved' or state in ('draft', 'purchase', 'done', 'cancel')">
                     <strong>Margin Alert: </strong>
                     <field name="margin_warning_message" nolabel="1"/>
                     Approval required to confirm this order.
@@ -107,22 +107,22 @@
                <!-- Success alert - shown when waiting for approval (to_approve state) -->
                 <div class="alert alert-info" role="alert"
                      invisible="margin_approval_status != 'to_approve'">
-                    <strong>PO Approval: </strong> PO Pending for Approval.
+                    <strong>Margin Approval: </strong> Margin Pending for Approval.
                 </div>
 
                 <!-- Success alert - shown when approved -->
                 <div class="alert alert-success" role="alert"
                      invisible="margin_approval_status != 'approved'">
-                    <strong>PO Approved: </strong> PO Approved Successfully.
+                    <strong>Margin Approved: </strong> Margin Approved Successfully.
                 </div>
                 <div class="alert alert-danger" role="alert"
                      invisible="margin_approval_status != 'rejected'">
-                    <strong>PO Approval: </strong> The PO has been rejected.
+                    <strong>Margin Approval: </strong> The Margin has been rejected.
                 </div>
 
                <!-- Pending -->
                 <div class="alert alert-info" role="alert"
-                     groups="boq_management_v19.group_vendor,boq_management_v19.group_vendor_manager_dashboard"
+                     groups="boq_management_v19.group_vendor,boq_management_v19.group_vendor_manager_dashboard,boq_management_v19.group_supplier,boq_management_v19.group_procurement_manager_dashboard"
                      invisible="state != 'to approve'">
                     <strong>Approval:</strong>
                     PO approval pending
@@ -130,7 +130,7 @@
 
                 <!-- Approved -->
                 <div class="alert alert-success" role="alert"
-                     groups="boq_management_v19.group_vendor,boq_management_v19.group_vendor_manager_dashboard"
+                     groups="boq_management_v19.group_vendor,boq_management_v19.group_vendor_manager_dashboard,boq_management_v19.group_supplier,boq_management_v19.group_procurement_manager_dashboard"
                      invisible="state != 'purchase'">
                     <strong>Approval:</strong>
                     PO approved successfully
@@ -226,11 +226,11 @@
             </xpath>
 
             <!--  Confirm Order for sent state -->
-<!--            <xpath expr="//button[@name='button_confirm'][@id='bid_confirm']" position="attributes">-->
-<!--                <attribute name="invisible">-->
-<!--                    state != 'sent' or (has_margin_below_threshold and margin_approval_status != 'approved')-->
-<!--                </attribute>-->
-<!--            </xpath>-->
+            <xpath expr="//button[@name='button_confirm'][@id='bid_confirm']" position="attributes">
+                <attribute name="invisible">
+                    state != 'sent' or (has_margin_below_threshold and margin_approval_status != 'approved')
+                </attribute>
+            </xpath>
 
             <!--  NEW: Confirm Order for submitted state -->
             <xpath expr="//button[@name='button_confirm'][@id='bid_confirm']" position="after">
