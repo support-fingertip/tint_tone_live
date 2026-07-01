@@ -6,12 +6,12 @@ class ResCompany(models.Model):
     _inherit = 'res.company'
 
     invoice_approval_active = fields.Boolean(
-        string='Invoice Approval',
-        help='Require associates to submit invoices for approval when total exceeds the minimum amount.',
+        string='Invoice, Bill, Credit/Debit Note Approval',
+        help='Require associates to submit invoices, bills, credit notes, and debit notes for approval when total exceeds the minimum amount.',
     )
     invoice_approval_amount = fields.Monetary(
-        string='Minimum Invoice Amount',
-        help='Invoices with a total above this amount require approval from an administrator.',
+        string='Minimum Amount',
+        help='Invoices, bills, credit notes, and debit notes with a total above this amount require approval from an administrator.',
     )
     receipt_approval_active = fields.Boolean(
         string='Receipt Approval',

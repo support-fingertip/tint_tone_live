@@ -13,8 +13,8 @@
 
                         <setting id="inv_invoice_approval"
                                  company_dependent="1"
-                                 help="Require Associate users to submit invoices for approval when the total exceeds the minimum amount.">
-                            <field name="invoice_approval_active" string="Invoice Approval"/>
+                                 help="Require Associate users to submit invoices, bills, credit notes, and debit notes for approval when the total exceeds the minimum amount.">
+                            <field name="invoice_approval_active" string="Invoice, Bill, Credit/Debit Note Approval"/>
                             <div class="content-group" invisible="not invoice_approval_active">
                                 <div class="row mt16">
                                     <label for="invoice_approval_amount" class="col-lg-4 o_light_label" string="Minimum Amount"/>

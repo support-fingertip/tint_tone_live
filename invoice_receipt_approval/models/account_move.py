@@ -3,8 +3,9 @@ from odoo import models, fields, api
 from odoo.exceptions import UserError
 
 _INVOICE_TYPES = ('out_invoice', 'in_invoice')
+_REFUND_TYPES = ('out_refund', 'in_refund')
 _RECEIPT_TYPES = ('out_receipt', 'in_receipt')
-_APPROVAL_MOVE_TYPES = _INVOICE_TYPES + _RECEIPT_TYPES
+_APPROVAL_MOVE_TYPES = _INVOICE_TYPES + _REFUND_TYPES + _RECEIPT_TYPES
 
 
 class AccountMove(models.Model):
@@ -50,7 +51,7 @@ class AccountMove(models.Model):
     def _is_approval_required(self):
         self.ensure_one()
         company = self.company_id
-        if self.move_type in _INVOICE_TYPES:
+        if self.move_type in _INVOICE_TYPES or self.move_type in _REFUND_TYPES:
             return bool(
                 company.invoice_approval_active
                 and self.amount_total > company.invoice_approval_amount
